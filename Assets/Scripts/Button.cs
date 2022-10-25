@@ -7,16 +7,6 @@ using System;
 
 public class Button : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    { 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
     static Color enabledButtonColor { get; } = new Color(0.3f, 0.3f, 0.3f, 1);
     static Color enabledTextColor { get; } = new Color(1, 1, 1, 1);
     static Color disabledButtonColor { get; } = new Color(0.3f, 0.3f, 0.3f, 0.4f);

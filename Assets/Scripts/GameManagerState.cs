@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 using System;
+using Photon.Pun;
 
 // GameManagerにstateパターンを適用
 abstract class GameManagerState
@@ -107,15 +107,18 @@ class PrepareCardState : GameManagerState
         {
             for (int i = 1; i <= 13; i++)
             {
-                Image newCardImageObj = Image.Instantiate(m_ImageCardPrefab);
+                //Image newCardImageObj = Image.Instantiate(m_ImageCardPrefab);
+                Image newCardImageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
                 Card newCard = newCardImageObj.GetComponent<Card>();
                 newCard.Initialize(newCardImageObj, s, i);
                 newCard.name = s.ToString() + "_" + i.ToString();
                 m_RootDeck.AddCard(newCard, false);
             }
         }
-        Image joker1_imageObj = Image.Instantiate(m_ImageCardPrefab);
-        Image joker2_imageObj = Image.Instantiate(m_ImageCardPrefab);
+        //Image joker1_imageObj = Image.Instantiate(m_ImageCardPrefab);
+        //Image joker2_imageObj = Image.Instantiate(m_ImageCardPrefab);
+        Image joker1_imageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
+        Image joker2_imageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
         Card joker1 = joker1_imageObj.GetComponent<Card>();
         Card joker2 = joker2_imageObj.GetComponent<Card>();
         joker1.Initialize(joker1_imageObj, Card.Suit.Joker, 1);
