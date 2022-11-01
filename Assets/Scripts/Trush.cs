@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class Trush : Deck
 {
@@ -13,14 +14,6 @@ public class Trush : Deck
         DisableReceiveDrop();
         m_isFront = true;
         DisableMask();
-    }
-    // Start is called before the first frame update
-    void Start() {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
     }
 
     //public void DoDiscardAnim(bool ifTurnover)
@@ -37,10 +30,25 @@ public class Trush : Deck
     //    }
     //}
 
-    public override void AddCard(Card card, bool doAnim = true)
+    // AddCardRPCÇÃÉâÉbÉpä÷êî
+    override public void AddCard(Card card, bool doAnim = true, bool doSync = true)
+    {
+        if (doSync)
+        {
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+        }
+        else
+        {
+            AddCardRPC(card, doAnim);
+        }
+    }
+
+    [PunRPC]
+    override public void AddCardRPC(Card card, bool doAnim)
     {
         mask.transform.SetAsLastSibling();
-        base.AddCard(card, doAnim);
+        //base.AddCard(card, doAnim);
+        base.AddCardRPC(card, doAnim);
     }
 
     public void EnableMask()

@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Photon.Pun;
 
-public class AnimationQueue
+public class AnimationQueue : MonoBehaviourPunCallbacks
 {
     // シングルトン実装
     private static AnimationQueue instance;
@@ -13,7 +14,8 @@ public class AnimationQueue
         {
             if(instance == null)
             {
-                instance = new AnimationQueue();
+                //instance = new AnimationQueue();
+                instance = (AnimationQueue)FindObjectOfType(typeof(AnimationQueue));
                 if (null == instance)
                 {
                     Debug.Log(" AnimationQueue Instance Error ");
@@ -26,7 +28,6 @@ public class AnimationQueue
     {
         m_animMethods = new List<List<MethodAndWaitFrames>>();
     }
-
 
     // アニメーションを行うメソッドの戻り値(IEnumerator<bool>)と待ちフレーム数をセットで保持する
     public class MethodAndWaitFrames
@@ -88,6 +89,12 @@ public class AnimationQueue
     {
         //Debug.Log("AddAnimToLastIndex");
         MethodAndWaitFrames additionalMethod = new MethodAndWaitFrames(retValOfAnimMethod, waitFrames);
+
+        if(m_animMethods.Count == 0)
+        {
+            CreateNewEmptyAnimListToEnd();
+        }
+
         m_animMethods[m_animMethods.Count - 1].Add(additionalMethod);
 
         if(m_animMethods[m_animMethods.Count - 1].Count > 100)
@@ -108,6 +115,11 @@ public class AnimationQueue
         AddAnimToLastIndex(enumerator());
     }
     public void CreateNewEmptyAnimListToEnd()
+    {
+        photonView.RPC(nameof(CreateNewEmptyAnimListToEndRPC), RpcTarget.All);
+    }
+    [PunRPC]
+    private void CreateNewEmptyAnimListToEndRPC()
     {
         //Debug.Log("CreateNewEmptyAnimListToEnd");
         m_animMethods.Add(new List<MethodAndWaitFrames>());
