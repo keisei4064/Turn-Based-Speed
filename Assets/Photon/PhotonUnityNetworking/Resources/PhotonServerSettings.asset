@@ -39,6 +39,14 @@ MonoBehaviour:
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
+  - AddCardRPC
+  - InitializeRPC
+  - DoAnim_Shuffle
+  - CreateNewEmptyAnimListToEndRPC
+  - MakeInitialHands
+  - AddCardWithDelayRPC
+  - SetViewOrderRPC
+  - SetTransformPositionToParentRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

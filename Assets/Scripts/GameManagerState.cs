@@ -56,27 +56,36 @@ class PrepareCardState : GameManagerState
     }
 
 
-
     public override void Enter()
     {
         m_gameStatus.m_nowMode = GameStatus.Mode.PREPARE_CARD;
         Debug.Log("Gamemode: PREPARE_CARD");
 
-        // やる処理をすべて登録しておく
-        WorkQueue.Instance.EnqueueOnceRunFuncs(
-                MakeAllCardsToRootDeck,
-                () =>
-                {
-                    AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
-                    m_RootDeck.Shuffle();
-                },
-                MakeMyOppoDeck,
-                MakeInitialHands,
-                MakeInitialTrash,
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Debug.Log("自身がマスタークライアントです");
 
-                // TODO: どっちから始めるか
-                m_gameStatus.SetTurnRandom
-            );
+            // やる処理をすべて登録しておく
+            WorkQueue.Instance.EnqueueOnceRunFuncs(
+                    MakeAllCardsToRootDeck,
+                    () =>
+                    {
+                        AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
+                        m_RootDeck.Shuffle();
+                    },
+                    MakeMyOppoDeck,
+                    MakeInitialHands,
+                    MakeInitialTrash,
+
+                    // TODO: どっちから始めるか
+                    m_gameStatus.SetTurnRandom
+                );
+        }
+        else
+        {
+            Debug.Log("自身はマスタークライアントではありません");
+        }
+
 
         // 次のState登録
         WorkQueue.Instance.EnqueueOnceRunFunc(
@@ -98,6 +107,7 @@ class PrepareCardState : GameManagerState
     }
 
 // -------------------------------------------------------------------------------------------------------
+    // TODO:ジョーカーでばぐってる
     void MakeAllCardsToRootDeck()
     {
         Debug.Log("Making All Root Deck's Cards");
@@ -110,9 +120,10 @@ class PrepareCardState : GameManagerState
                 //Image newCardImageObj = Image.Instantiate(m_ImageCardPrefab);
                 Image newCardImageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
                 Card newCard = newCardImageObj.GetComponent<Card>();
-                newCard.Initialize(newCardImageObj, s, i);
+                newCard.Initialize(s, i);
                 newCard.name = s.ToString() + "_" + i.ToString();
-                m_RootDeck.AddCard(newCard, false);
+
+                m_RootDeck.AddCard(newCard, false, true);
             }
         }
         //Image joker1_imageObj = Image.Instantiate(m_ImageCardPrefab);
@@ -121,22 +132,25 @@ class PrepareCardState : GameManagerState
         Image joker2_imageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
         Card joker1 = joker1_imageObj.GetComponent<Card>();
         Card joker2 = joker2_imageObj.GetComponent<Card>();
-        joker1.Initialize(joker1_imageObj, Card.Suit.Joker, 1);
-        joker2.Initialize(joker2_imageObj, Card.Suit.Joker, 2);
+        joker1.Initialize(Card.Suit.Joker, 1, true);
+        joker2.Initialize(Card.Suit.Joker, 2, true);
         joker1.name = "joker_1";
         joker2.name = "joker_2";
-        m_RightTrush.AddCard(joker1, false);
-        m_LeftTrush.AddCard(joker2, false);
-        joker1.TurnIntoFront();
-        joker2.TurnIntoFront();
 
+        m_RightTrush.AddCard(joker1, false, true);
+        m_LeftTrush.AddCard(joker2, false, true);
+
+
+        // 位置の整列
         foreach (Card card in m_RootDeck.m_cards)
         {
-            card.transform.position = m_RootDeck.transform.position;
+            //card.transform.position = m_RootDeck.transform.position;
+            card.SetTransformPositionToParent();
         }
-        joker1.transform.position = m_RightTrush.transform.position;
-        joker2.transform.position = m_LeftTrush.transform.position;
-
+        //joker1.transform.position = m_RightTrush.transform.position;
+        //joker2.transform.position = m_LeftTrush.transform.position;
+        joker1.SetTransformPositionToParent();
+        joker2.SetTransformPositionToParent();
         m_RootDeck.SetViewOrder();
     }
 
@@ -155,16 +169,15 @@ class PrepareCardState : GameManagerState
         {
             Card card1 = m_RootDeck.DrawCard();
             Card card2 = m_RootDeck.DrawCard();
-            m_MyDeck.AddCard(card1, false);
-            m_OppoDeck.AddCard(card2, false);
-
-            // アニメーション処理
-            IEnumerator<bool> animRetVal1 = card1.Anim_StraightLineMove(myDeckPositon);
-            IEnumerator<bool> animRetVal2 = card2.Anim_StraightLineMove(oppoDeckPositon);
             int waitFrames = 10 + i;
+            m_MyDeck.AddCardWithDelay(card1, waitFrames);
+            m_OppoDeck.AddCardWithDelay(card2, waitFrames);
 
-            AnimationQueue.Instance.AddAnimToLastIndex(animRetVal1, waitFrames);
-            AnimationQueue.Instance.AddAnimToLastIndex(animRetVal2, waitFrames);
+            //// アニメーション処理
+            //IEnumerator<bool> animRetVal1 = card1.Anim_StraightLineMove(myDeckPositon);
+            //IEnumerator<bool> animRetVal2 = card2.Anim_StraightLineMove(oppoDeckPositon);
+            //AnimationQueue.Instance.AddAnimToLastIndex(animRetVal1, waitFrames);
+            //AnimationQueue.Instance.AddAnimToLastIndex(animRetVal2, waitFrames);
         }
 
         //ジョーカー
@@ -176,6 +189,9 @@ class PrepareCardState : GameManagerState
         m_MyDeck.Shuffle();
         m_OppoDeck.Shuffle();
     }
+
+    [PunRPC]
+
 
     void MakeInitialHands()
     {
@@ -427,9 +443,9 @@ class PlayingState : GameManagerState
         Card.EnqueueHappenHandlingObserver(() =>
         {
             if (topCard.GetParentHoldCardObject() == m_handlingHand) //手札にドローしたとき
-                {
-                    // INITIAL_CARDS_NUMの枚数まで自動で引く
-                    int drawNum = Hand.INITIAL_CARDS_NUM - m_handlingHand.m_cards.Count;
+            {
+                // INITIAL_CARDS_NUMの枚数まで自動で引く
+                int drawNum = Hand.INITIAL_CARDS_NUM - m_handlingHand.m_cards.Count;
                 if (drawNum > m_handlingDeck.m_cards.Count) drawNum = m_handlingDeck.m_cards.Count;
                 if (drawNum > 0)
                 {

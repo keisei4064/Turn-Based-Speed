@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using System;
+using Photon.Pun;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviourPunCallbacks
 {
     //シングルトン実装
     private static GameManager instance;
@@ -76,9 +77,12 @@ public class GameManager : MonoBehaviour
         m_UIManager = m_UIManagerObj.GetComponent<UIManager>();
 
         m_gameStatus = new GameStatus();
+
+        //Cardのシリアライズルール登録
+        Card.RegisterSerializeRule();
     }
 
-    // Start is called before the first frame updat e
+    // Start is called before the first frame update
     void Start()
     {
         Card.LoadImages();

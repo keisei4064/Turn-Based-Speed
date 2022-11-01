@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 
-public abstract class HoldCardObject : MonoBehaviour
+public abstract class HoldCardObject : MonoBehaviourPunCallbacks
 {
     //m_cards[0]が一番下
     public List<Card> m_cards;// { get; protected set; }
@@ -12,12 +13,29 @@ public abstract class HoldCardObject : MonoBehaviour
     public GameObject m_dropRange;
     public GameObject m_canDropSign;
 
-    virtual public void AddCard(Card card, bool doAnim)
+    // AddCardRPCのラッパ関数
+    virtual public void AddCard(Card card, bool doAnim, bool doSync)
     {
+        if (doSync)
+        {
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+        }
+        else
+        {
+            AddCardRPC(card, doAnim);
+        }
+    }
+
+    [PunRPC]
+    virtual public void AddCardRPC(Card card, bool doAnim)
+    {
+        Debug.Assert(card != null);
+
         Transform canvas = card.transform.parent; // Canvas <- Card
-        if (canvas != null)
+        if (canvas != null) //XXX: parentが取得できない
         {
             Transform parent = canvas.parent; // HoldCardObject <- Canvas
+            Debug.Assert(parent != null);
             //Debug.Log(card.name + "'s parent is " + parent.name);
             parent.GetComponent<HoldCardObject>().RemoveCard(card, true);
         }
@@ -26,9 +44,9 @@ public abstract class HoldCardObject : MonoBehaviour
         m_cards.Add(card);
         card.transform.SetAsLastSibling(); // 描写を一番最後に設定
 
-        if(card.m_mode == Card.MODE.COMBINED || card.m_mode == Card.MODE.COMPRESSED)
+        if (card.m_mode == Card.MODE.COMBINED || card.m_mode == Card.MODE.COMPRESSED)
         {
-            foreach(Card containedCard in card.m_cards)
+            foreach (Card containedCard in card.m_cards)
             {
                 containedCard.transform.SetParent(this.transform.Find("Canvas").transform); // Cardの親をこのオブジェクトに設定
                 containedCard.transform.SetAsLastSibling(); // 描写を一番最後に設定
@@ -37,6 +55,7 @@ public abstract class HoldCardObject : MonoBehaviour
         m_dropRange.transform.SetAsLastSibling();
         m_canDropSign.transform.SetAsLastSibling();
     }
+
 
     virtual public void RemoveCard(Card card, bool doAnim)
     {

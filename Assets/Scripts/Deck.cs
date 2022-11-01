@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 using UnityEngine.UI;
+using Photon.Pun;
 
 public class Deck : HoldCardObject
 {
@@ -28,10 +29,25 @@ public class Deck : HoldCardObject
     {
     }
 
-    // カードを加える
-    override public void AddCard(Card card, bool doAnim = true)
+
+    // AddCardRPCのラッパ関数
+    override public void AddCard(Card card, bool doAnim = true, bool doSync = true)
     {
-        base.AddCard(card, doAnim);
+        if (doSync)
+        {
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+        }
+        else
+        {
+            AddCardRPC(card, doAnim);
+        }
+    }
+
+    [PunRPC]
+    override public void AddCardRPC(Card card, bool doAnim)
+    {
+        //base.AddCard(card, doAnim);
+        base.AddCardRPC(card, doAnim);
 
         if (doAnim)
         {
@@ -44,6 +60,26 @@ public class Deck : HoldCardObject
             {
                 AnimationQueue.Instance.AddAnimToLastIndex(card.Anim_StraightLineMoveWithTurnOver(this.gameObject.transform.position));
             }
+        }
+    }
+    public void AddCardWithDelay(Card card, int waitFrames)
+    {
+        photonView.RPC(nameof(AddCardWithDelayRPC), RpcTarget.All, card, waitFrames);
+    }
+
+    [PunRPC]
+    private void AddCardWithDelayRPC(Card card, int waitFrames)
+    {
+        base.AddCardRPC(card, false);
+
+        // アニメーション処理
+        if (card.m_isFront == this.m_isFront)
+        {
+            AnimationQueue.Instance.AddAnimToLastIndex(card.Anim_StraightLineMove(this.gameObject.transform.position), waitFrames);
+        }
+        else
+        {
+            AnimationQueue.Instance.AddAnimToLastIndex(card.Anim_StraightLineMoveWithTurnOver(this.gameObject.transform.position), waitFrames);
         }
     }
 
@@ -61,7 +97,7 @@ public class Deck : HoldCardObject
         int lastIndex = m_cards.Count - 1;
         Card c = m_cards[lastIndex];
         m_cards.RemoveAt(lastIndex);
-        
+
         return c;
     }
 
@@ -69,7 +105,7 @@ public class Deck : HoldCardObject
     public void LogNowOrder()
     {
         string str = this.name + ": Deck's Order\n";
-        for(int i = 0; i < m_cards.Count; i++)
+        for (int i = 0; i < m_cards.Count; i++)
         {
             str += "\tm_cards[" + i.ToString() + "]: ";
             str += m_cards[i].GetComponent<Card>().GetImage().name;
@@ -85,19 +121,15 @@ public class Deck : HoldCardObject
         randomSeed++;
         //Debug.Log(this.name + ": Shuffling");
         //Debug.Log("Random seed is " + System.DateTime.Now.Millisecond * randomSeed);
-        List<Card> ShuffledCards = new List<Card>();
-        while (m_cards.Count != 0)
+
+        for (int i = m_cards.Count; i != 0; i--)
         {
             Random.InitState(System.DateTime.Now.Millisecond * randomSeed);
-            int i = Random.Range(0, m_cards.Count);
-
-            ShuffledCards.Add(m_cards[i]);
-            m_cards.RemoveAt(i);
+            int index = Random.Range(0, i);
+            AddCard(m_cards[index], false);
         }
 
-        m_cards = ShuffledCards;
-
-        AnimationQueue.Instance.AddAnimToLastIndex(Anim_Shuffle());
+        photonView.RPC(nameof(DoAnim_Shuffle), RpcTarget.All);
     }
 
     //シャッフルのアニメーションメソッド
@@ -156,7 +188,19 @@ public class Deck : HoldCardObject
         yield return true;
     }
 
+    [PunRPC]
+    private void DoAnim_Shuffle()
+    {
+        AnimationQueue.Instance.AddAnimToLastIndex(Anim_Shuffle());
+    }
+
     public void SetViewOrder()
+    {
+        photonView.RPC(nameof(SetViewOrderRPC), RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void SetViewOrderRPC()
     {
         for (int i = 0; i < m_cards.Count; i++)
         {

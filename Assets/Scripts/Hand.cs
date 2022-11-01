@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class Hand : HoldCardObject
 {
@@ -19,34 +20,41 @@ public class Hand : HoldCardObject
         m_isFront = true;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
 
     public bool CanAddCard()
     {
         return m_cards.Count < MAX_CARDS_NUM;
     }
 
-    override public void AddCard(Card card, bool doAnim = true)
+    // AddCardRPCのラッパ関数
+    override public void AddCard(Card card, bool doAnim = true, bool doSync = true)
+    {
+        if (doSync)
+        {
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+        }
+        else
+        {
+            AddCardRPC(card, doAnim);
+        }
+    }
+
+    [PunRPC]
+    override public void AddCardRPC(Card card, bool doAnim)
     {
         if (!CanAddCard())
         {
             Debug.LogError("Hand can't have more card than MAX_CARDS_NUM.");
         }
 
-        base.AddCard(card, doAnim);
+        //base.AddCard(card, doAnim);
+        base.AddCardRPC(card, doAnim);
 
         // アニメーション処理
         if (doAnim)
             DoAddCardAnim();
     }
+
     public override void RemoveCard(Card card, bool doAnim)
     {
         base.RemoveCard(card, doAnim);
@@ -63,7 +71,7 @@ public class Hand : HoldCardObject
             AnimationQueue.Instance.AddAnimToLastIndex(animRetVal);
         }
     }
-
+        
     // AddCardを行った後
     public void DoAddCardAnim()
     {
@@ -104,8 +112,6 @@ public class Hand : HoldCardObject
         base.CardDrop(droppedCard);
         AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
         AddCard(droppedCard);
-
-        //DoAddCardAnim();
     }
     public int GetSingleCardNum()
     {

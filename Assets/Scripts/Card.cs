@@ -5,9 +5,12 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 using System;
+using ExitGames.Client.Photon;
+using Photon.Pun;
 
 public class Card : HoldCardObject,
-                    IDragHandler, IBeginDragHandler, IEndDragHandler
+                    IDragHandler, IBeginDragHandler, IEndDragHandler,
+                    IPunObservable
 {
     public enum Suit
     {
@@ -51,7 +54,7 @@ public class Card : HoldCardObject,
         DisableReceiveDrop();
         m_beginDragObserverList = new List<Action>();
         m_endDragObserverList = new List<Action>();
-        if(m_happenHandlingObserverQueue == null)
+        if (m_happenHandlingObserverQueue == null)
             m_happenHandlingObserverQueue = new Queue<Action>();
         m_canDragSign.SetActive(false);
 
@@ -80,7 +83,7 @@ public class Card : HoldCardObject,
         Color originColor = m_attachedObject.color;
         virtualCard.m_attachedObject.color = new Color(originColor.r, originColor.g, originColor.b, 0.5f);
         m_virtualCards.Add(virtualCard);
-        foreach(Card subCard in m_cards)
+        foreach (Card subCard in m_cards)
         {
             Card virtualSubCard = Instantiate(subCard, GameManager.Instance.m_TopLayerCanvas.transform);
             Color subOriginColor = m_attachedObject.color;
@@ -117,7 +120,7 @@ public class Card : HoldCardObject,
             }
         }
         hits = Physics2D.RaycastAll(targetPos, new Vector3(0, 0, 1));
-        foreach(var hit in hits)
+        foreach (var hit in hits)
         {
             HoldCardObject cardDroppedFuncs = hit.collider.gameObject.GetComponent<HoldCardObject>();
             if (cardDroppedFuncs != null)
@@ -128,7 +131,7 @@ public class Card : HoldCardObject,
     {
         if (!m_canDrag) return;
         //Debug.Log("OnEndDrag");
-        foreach(Card c in m_virtualCards)
+        foreach (Card c in m_virtualCards)
         {
             if (c != null)
                 Destroy(c.gameObject);
@@ -184,14 +187,23 @@ public class Card : HoldCardObject,
     }
 
 
-    public void Initialize(Image imageObject, Suit suitVal, int numVal, bool isFront = false)
+    public void Initialize(Suit suitVal, int numVal, bool isFront = false)
     {
-        m_attachedObject = imageObject;
+        photonView.RPC(nameof(InitializeRPC), RpcTarget.All, suitVal, numVal, isFront);
+
+    }
+
+    [PunRPC]
+    private void InitializeRPC(Suit suitVal, int numVal, bool isFront)
+    {
+        m_attachedObject = this.gameObject.GetComponent<Image>();
         m_suit = suitVal;
         m_num = numVal;
         m_isFront = isFront;
         LoadImages();
         m_attachedObject.sprite = GetImage();
+
+        SyncManager.Instance.RegistCardInstance(this);
     }
 
     static public void LoadImages()
@@ -244,7 +256,7 @@ public class Card : HoldCardObject,
 
         foreach (Sprite sprite in m_sprites)
         {
-            if(sprite.name == fileName)
+            if (sprite.name == fileName)
             {
                 return sprite;
             }
@@ -290,7 +302,7 @@ public class Card : HoldCardObject,
             Debug.LogError("couldn't find canvas.");
 
         this.transform.SetParent(GameManager.Instance.m_TopLayerCanvas.transform);
-        foreach(Card card in m_cards)
+        foreach (Card card in m_cards)
         {
             card.transform.SetParent(GameManager.Instance.m_TopLayerCanvas.transform);
         }
@@ -299,9 +311,9 @@ public class Card : HoldCardObject,
         for (int i = 0; i < frameToSpend; i++)
         {
             this.transform.position += distOfFrame;
-            if(m_mode == MODE.COMBINED || m_mode == MODE.COMPRESSED || m_mode == MODE.COMPRESSING)
+            if (m_mode == MODE.COMBINED || m_mode == MODE.COMPRESSED || m_mode == MODE.COMPRESSING)
             {
-                foreach(Card card in m_cards)
+                foreach (Card card in m_cards)
                 {
                     card.transform.position += distOfFrame;
                 }
@@ -331,7 +343,7 @@ public class Card : HoldCardObject,
         IEnumerator<bool> lineMove = Anim_StraightLineMove(afterPosition, frameToSpend);
         IEnumerator<bool> turnOver = Anim_TurnOver(frameToSpend);
 
-        while(!lineMove.Current || !turnOver.Current)
+        while (!lineMove.Current || !turnOver.Current)
         {
             lineMove.MoveNext();
             turnOver.MoveNext();
@@ -343,9 +355,9 @@ public class Card : HoldCardObject,
     public IEnumerator<bool> Anim_Rotate(float afterRotation, int frameToSpend = 20)
     {
         float rotateAnglePerFrame = (afterRotation - this.transform.rotation.z) / frameToSpend;
-        for(int i = 0; i < frameToSpend; i++)
+        for (int i = 0; i < frameToSpend; i++)
         {
-            this.transform.Rotate(0,0,rotateAnglePerFrame);
+            this.transform.Rotate(0, 0, rotateAnglePerFrame);
             yield return false;
         }
 
@@ -360,7 +372,7 @@ public class Card : HoldCardObject,
 
         while (!lineMove.Current && !rotate.Current)
         {
-            if(lineMove.Current == false)
+            if (lineMove.Current == false)
             {
                 lineMove.MoveNext();
             }
@@ -391,7 +403,22 @@ public class Card : HoldCardObject,
         m_attachedObject.sprite = GetImage();
     }
 
-    public override void AddCard(Card card, bool doAnim = true)
+    // AddCardRPCのラッパ関数
+    override public void AddCard(Card card, bool doAnim = true, bool doSync = true)
+    {
+        if (doSync)
+        {
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+        }
+        else
+        {
+            AddCardRPC(card, doAnim);
+        }
+    }
+
+    // TODO: 合成と圧縮が受信側だと分からない
+    [PunRPC]
+    override public void AddCardRPC(Card card, bool doAnim)
     {
         Debug.Assert(m_mode == MODE.WAIT_COMBINE || m_mode == MODE.WAIT_COMPRESS
              || m_mode == MODE.COMPRESSING);
@@ -446,12 +473,11 @@ public class Card : HoldCardObject,
             AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
             parent.GetComponent<HoldCardObject>().RemoveCard(card, true);
         }
-
     }
 
     public bool IsContinuous(Card other)
     {
-        if(this.m_suit == Suit.Joker || other.m_suit == Suit.Joker) 
+        if (this.m_suit == Suit.Joker || other.m_suit == Suit.Joker)
             return true;
 
         int big = this.m_num + 1;
@@ -512,4 +538,55 @@ public class Card : HoldCardObject,
         AddCard(droppedCard);
     }
 
+    public void SetTransformPositionToParent()
+    {
+        photonView.RPC(nameof(SetTransformPositionToParentRPC), RpcTarget.All);
+    }
+    [PunRPC]
+    private void SetTransformPositionToParentRPC()
+    {
+        this.transform.position = this.transform.parent.position;
+    }
+
+
+    //PUNで通信できるようシリアライズ化
+    private static readonly byte[] m_bufferCard = new byte[2];
+    public static short SerializeCard(StreamBuffer outStream, object customObject)
+    {
+        var card = (Card)customObject;
+        lock (m_bufferCard)
+        {
+            m_bufferCard[0] = (byte)card.m_num;
+            m_bufferCard[1] = (byte)card.m_suit;
+            outStream.Write(m_bufferCard, 0, 2);
+        }
+        return 2;
+    }
+    private static object DeserializeCard(StreamBuffer inStream, short length)
+    {
+        byte num, suit;
+        lock (m_bufferCard)
+        {
+            inStream.Read(m_bufferCard, 0, 2);
+            num = m_bufferCard[0];
+            suit = m_bufferCard[1];
+        }
+        return SyncManager.Instance.GetCardInstance(num, (Card.Suit)suit);
+    }
+    public static void RegisterSerializeRule()
+    {
+        PhotonPeer.RegisterType(typeof(Card), 1, SerializeCard, DeserializeCard);
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(this.name);
+        }
+        else
+        {
+            this.name = (String)stream.ReceiveNext();
+        }
+    }
 }
