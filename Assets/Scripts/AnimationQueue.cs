@@ -116,7 +116,7 @@ public class AnimationQueue : MonoBehaviourPunCallbacks
     }
     public void CreateNewEmptyAnimListToEnd()
     {
-        photonView.RPC(nameof(CreateNewEmptyAnimListToEndRPC), RpcTarget.All);
+        photonView.RPC(nameof(CreateNewEmptyAnimListToEndRPC), RpcTarget.AllBuffered);
     }
     [PunRPC]
     private void CreateNewEmptyAnimListToEndRPC()

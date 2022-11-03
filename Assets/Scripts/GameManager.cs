@@ -90,6 +90,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             m_RootDeck, m_MyDeck, m_OppoDeck, m_RightTrush, m_LeftTrush, m_MyHand, m_OppoHand, m_UIManager, m_gameStatus,
             m_ImageCardPrefab);
         m_nowState.Enter();
+
+        PhotonNetwork.IsMessageQueueRunning = true;
     }
 
     // Update is called once per frame

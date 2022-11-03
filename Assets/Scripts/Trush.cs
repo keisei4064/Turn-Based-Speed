@@ -35,7 +35,7 @@ public class Trush : Deck
     {
         if (doSync)
         {
-            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.AllBuffered, card, doAnim);
         }
         else
         {

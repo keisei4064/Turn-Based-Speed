@@ -35,7 +35,7 @@ public class Deck : HoldCardObject
     {
         if (doSync)
         {
-            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.AllBuffered, card, doAnim);
         }
         else
         {
@@ -64,7 +64,7 @@ public class Deck : HoldCardObject
     }
     public void AddCardWithDelay(Card card, int waitFrames)
     {
-        photonView.RPC(nameof(AddCardWithDelayRPC), RpcTarget.All, card, waitFrames);
+        photonView.RPC(nameof(AddCardWithDelayRPC), RpcTarget.AllBuffered, card, waitFrames);
     }
 
     [PunRPC]
@@ -129,7 +129,7 @@ public class Deck : HoldCardObject
             AddCard(m_cards[index], false);
         }
 
-        photonView.RPC(nameof(DoAnim_Shuffle), RpcTarget.All);
+        photonView.RPC(nameof(DoAnim_Shuffle), RpcTarget.AllBuffered);
     }
 
     //シャッフルのアニメーションメソッド
@@ -196,7 +196,7 @@ public class Deck : HoldCardObject
 
     public void SetViewOrder()
     {
-        photonView.RPC(nameof(SetViewOrderRPC), RpcTarget.All);
+        photonView.RPC(nameof(SetViewOrderRPC), RpcTarget.AllBuffered);
     }
 
     [PunRPC]

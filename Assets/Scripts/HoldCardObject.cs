@@ -18,7 +18,7 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
     {
         if (doSync)
         {
-            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.AllBuffered, card, doAnim);
         }
         else
         {
@@ -31,7 +31,8 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
     {
         Debug.Assert(card != null);
 
-        Transform canvas = card.transform.parent; // Canvas <- Card
+        //Transform canvas = card.transform.parent; // Canvas <- Card
+        Transform canvas = card.m_parent_canvas_transform; // Canvas <- Card
         if (canvas != null) //XXX: parentが取得できない
         {
             Transform parent = canvas.parent; // HoldCardObject <- Canvas
@@ -40,7 +41,8 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
             parent.GetComponent<HoldCardObject>().RemoveCard(card, true);
         }
 
-        card.transform.SetParent(this.transform.Find("Canvas").transform); // Cardの親をこのオブジェクトに設定
+        //card.transform.SetParent(this.transform.Find("Canvas").transform); // Cardの親をこのオブジェクトに設定
+        card.SetParentCanvas(this.transform.Find("Canvas").transform);  // Cardの親をこのオブジェクトに設定
         m_cards.Add(card);
         card.transform.SetAsLastSibling(); // 描写を一番最後に設定
 
@@ -48,7 +50,7 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
         {
             foreach (Card containedCard in card.m_cards)
             {
-                containedCard.transform.SetParent(this.transform.Find("Canvas").transform); // Cardの親をこのオブジェクトに設定
+                containedCard.SetParentCanvas(this.transform.Find("Canvas").transform); // Cardの親をこのオブジェクトに設定
                 containedCard.transform.SetAsLastSibling(); // 描写を一番最後に設定
             }
         }
