@@ -29,6 +29,8 @@ public class Card : HoldCardObject,
     public GameObject m_combinedSign;
     public GameObject m_compressedSign;
 
+    public Transform m_parent_canvas_transform;
+
     static Sprite[] m_sprites;
 
     public enum MODE
@@ -189,8 +191,7 @@ public class Card : HoldCardObject,
 
     public void Initialize(Suit suitVal, int numVal, bool isFront = false)
     {
-        photonView.RPC(nameof(InitializeRPC), RpcTarget.All, suitVal, numVal, isFront);
-
+        photonView.RPC(nameof(InitializeRPC), RpcTarget.AllBuffered, suitVal, numVal, isFront);
     }
 
     [PunRPC]
@@ -297,9 +298,9 @@ public class Card : HoldCardObject,
     public IEnumerator<bool> Anim_StraightLineMove(Vector3 afterPosition, int frameToSpend = 20)
     {
         //Debug.Log("Anim_StraightLineMove start");
-        Transform originLayer = this.transform.parent;
-        if (originLayer == null)
-            Debug.LogError("couldn't find canvas.");
+        //Transform originLayer = this.transform.parent;
+        //if (originLayer == null)
+        //    Debug.LogError("couldn't find canvas.");
 
         this.transform.SetParent(GameManager.Instance.m_TopLayerCanvas.transform);
         foreach (Card card in m_cards)
@@ -329,10 +330,10 @@ public class Card : HoldCardObject,
             }
         }
 
-        this.transform.SetParent(originLayer);
+        this.transform.SetParent(m_parent_canvas_transform);
         foreach (Card card in m_cards)
         {
-            card.transform.SetParent(originLayer);
+            card.transform.SetParent(m_parent_canvas_transform);
         }
         //Debug.Log("Anim_StraightLineMove end");
         yield return true;
@@ -408,7 +409,7 @@ public class Card : HoldCardObject,
     {
         if (doSync)
         {
-            photonView.RPC(nameof(AddCardRPC), RpcTarget.All, card, doAnim);
+            photonView.RPC(nameof(AddCardRPC), RpcTarget.AllBuffered, card, doAnim);
         }
         else
         {
@@ -540,7 +541,7 @@ public class Card : HoldCardObject,
 
     public void SetTransformPositionToParent()
     {
-        photonView.RPC(nameof(SetTransformPositionToParentRPC), RpcTarget.All);
+        photonView.RPC(nameof(SetTransformPositionToParentRPC), RpcTarget.AllBuffered);
     }
     [PunRPC]
     private void SetTransformPositionToParentRPC()
@@ -548,6 +549,11 @@ public class Card : HoldCardObject,
         this.transform.position = this.transform.parent.position;
     }
 
+    public void SetParentCanvas(Transform canvas)
+    {
+        this.transform.SetParent(canvas);
+        this.m_parent_canvas_transform = canvas;
+    }
 
     //PUNで通信できるようシリアライズ化
     private static readonly byte[] m_bufferCard = new byte[2];

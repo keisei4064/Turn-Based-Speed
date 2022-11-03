@@ -73,6 +73,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             {
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 statusText.text = "対戦相手が揃いました。ゲームシーンに移動します。";
+
+                PhotonNetwork.IsMessageQueueRunning = false;
+
                 PhotonNetwork.LoadLevel("GameScene");
             }
         }

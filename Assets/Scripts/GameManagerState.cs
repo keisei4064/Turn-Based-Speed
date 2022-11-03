@@ -157,7 +157,8 @@ class PrepareCardState : GameManagerState
     //”z‚é
     void MakeMyOppoDeck()
     {
-        Debug.Log("Making MyDeck and OppoDeck");
+        //Debug.Log("Making MyDeck and OppoDeck");
+        SyncManager.Instance.Log("Making MyDeck and OppoDeck");
 
         int nLoop = m_RootDeck.m_cards.Count / 2;
         Vector3 myDeckPositon = m_MyDeck.transform.position;
@@ -188,6 +189,7 @@ class PrepareCardState : GameManagerState
         AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
         m_MyDeck.Shuffle();
         m_OppoDeck.Shuffle();
+        SyncManager.Instance.Log("shuffled");
     }
 
     [PunRPC]

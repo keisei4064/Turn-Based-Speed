@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class SyncManager : MonoBehaviour
+public class SyncManager : MonoBehaviourPunCallbacks
 {
     //ƒVƒ“ƒOƒ‹ƒgƒ“ŽÀ‘•
     private static SyncManager instance;
@@ -51,5 +52,15 @@ public class SyncManager : MonoBehaviour
         Debug.Assert(c != null);
 
         return c;
+    }
+
+    public void Log(string str)
+    {
+        photonView.RPC(nameof(LogRPC), RpcTarget.AllBuffered, str);
+    }
+    [PunRPC]
+    public void LogRPC(string str)
+    {
+        Debug.Log(str);
     }
 }
