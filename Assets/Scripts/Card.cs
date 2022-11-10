@@ -33,6 +33,9 @@ public class Card : HoldCardObject,
 
     static Sprite[] m_sprites;
 
+    public int m_sync_id;
+    private static int m_id_count = 0;
+
     public enum MODE
     {
         SINGLE,
@@ -43,8 +46,8 @@ public class Card : HoldCardObject,
         WAIT_COMPRESS,
         CONTAINED
     }
-    //public MODE m_mode { get; private set; }
-    public MODE m_mode;
+    public MODE m_mode { get; private set; }
+    //public MODE m_mode;
 
     //flags
     public bool m_isDragging { get; private set; } = false;
@@ -204,6 +207,8 @@ public class Card : HoldCardObject,
         LoadImages();
         m_attachedObject.sprite = GetImage();
 
+        m_sync_id = m_id_count;
+        m_id_count++;
         SyncManager.Instance.RegistCardInstance(this);
     }
 
@@ -518,6 +523,12 @@ public class Card : HoldCardObject,
 
     public void SetMode(MODE mode)
     {
+        photonView.RPC(nameof(SetModeRPC), RpcTarget.AllBuffered, mode);
+    }
+
+    [PunRPC]
+    public void SetModeRPC(MODE mode)
+    {
         m_mode = mode;
         //m_compressedSign.gameObject.SetActive(m_mode == MODE.COMPRESSED || m_mode == MODE.COMPRESSING);
         //m_combinedSign.gameObject.SetActive(m_mode == MODE.COMBINED);
@@ -531,6 +542,7 @@ public class Card : HoldCardObject,
             this.GetComponent<Image>().raycastTarget = true;
         }
     }
+
 
     override public void CardDrop(Card droppedCard)
     {
@@ -556,7 +568,7 @@ public class Card : HoldCardObject,
     }
 
     //PUNで通信できるようシリアライズ化
-    private static readonly byte[] m_bufferCard = new byte[2];
+    private static readonly byte[] m_bufferCard = new byte[3];
     public static short SerializeCard(StreamBuffer outStream, object customObject)
     {
         var card = (Card)customObject;
@@ -564,20 +576,22 @@ public class Card : HoldCardObject,
         {
             m_bufferCard[0] = (byte)card.m_num;
             m_bufferCard[1] = (byte)card.m_suit;
-            outStream.Write(m_bufferCard, 0, 2);
+            m_bufferCard[2] = (byte)card.m_sync_id;
+            outStream.Write(m_bufferCard, 0, 3);
         }
-        return 2;
+        return 3;
     }
     private static object DeserializeCard(StreamBuffer inStream, short length)
     {
-        byte num, suit;
+        byte num, suit, sync_id;
         lock (m_bufferCard)
         {
-            inStream.Read(m_bufferCard, 0, 2);
+            inStream.Read(m_bufferCard, 0, 3);
             num = m_bufferCard[0];
             suit = m_bufferCard[1];
+            sync_id = m_bufferCard[2];
         }
-        return SyncManager.Instance.GetCardInstance(num, (Card.Suit)suit);
+        return SyncManager.Instance.GetCardInstance(sync_id);
     }
     public static void RegisterSerializeRule()
     {
@@ -589,10 +603,12 @@ public class Card : HoldCardObject,
         if (stream.IsWriting)
         {
             stream.SendNext(this.name);
+            //stream.SendNext(this.m_mode);
         }
         else
         {
             this.name = (String)stream.ReceiveNext();
+            //this.m_mode = (MODE)stream.ReceiveNext();
         }
     }
 }

@@ -760,6 +760,8 @@ MonoBehaviour:
   m_canDragSign: {fileID: 8213642365316401266}
   m_combinedSign: {fileID: 3079706980322079035}
   m_compressedSign: {fileID: 9017128930610406059}
+  m_parent_canvas_transform: {fileID: 0}
+  m_sync_id: 0
   m_mode: 0
   m_canDrag: 0
 --- !u!61 &5378668905580235913

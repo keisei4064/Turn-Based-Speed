@@ -32,10 +32,13 @@ public class SyncManager : MonoBehaviourPunCallbacks
 
     public void RegistCardInstance(Card card)
     {
-        int num = card.m_num;
-        Card.Suit suit = card.m_suit;
+        //int num = card.m_num;
+        //Card.Suit suit = card.m_suit;
+        int index = card.m_sync_id;
 
-        m_cards[CalcCardsIndex(num, suit)] = card;
+        Debug.Assert(index < 54 & index >= 0);
+
+        m_cards[index] = card;
 
         //Debug.Log("SyncManager.m_cards[]‚Ì’†g‚ğ‡‚Éo—Í‚µ‚Ü‚·");
         //foreach(var c in m_cards)
@@ -45,10 +48,9 @@ public class SyncManager : MonoBehaviourPunCallbacks
         //Debug.Log("‡Œv" + m_cards.Length + "–‡");
     }
 
-    public Card GetCardInstance(int num, Card.Suit suit)
+    public Card GetCardInstance(int sync_id)
     {
-        Debug.Assert(num != 0);
-        Card c = m_cards[CalcCardsIndex(num, suit)];
+        Card c = m_cards[sync_id];
         Debug.Assert(c != null);
 
         return c;
