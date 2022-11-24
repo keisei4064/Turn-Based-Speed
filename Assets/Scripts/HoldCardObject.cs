@@ -9,7 +9,6 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
     //m_cards[0]が一番下
     public List<Card> m_cards;// { get; protected set; }
 
-    bool m_canReceiveDrop;
     public GameObject m_dropRange;
     public GameObject m_canDropSign;
 
@@ -67,13 +66,11 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
 
     public void EnableReceiveDrop()
     {
-        m_canReceiveDrop = true;
         m_canDropSign.SetActive(true);
         GetComponent<BoxCollider2D>().enabled = true;
     }
     public void DisableReceiveDrop()
     {
-        m_canReceiveDrop = false;
         m_canDropSign.SetActive(false);
         GetComponent<BoxCollider2D>().enabled = false;
     }

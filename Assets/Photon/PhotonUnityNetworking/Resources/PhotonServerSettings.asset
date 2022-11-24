@@ -49,6 +49,12 @@ MonoBehaviour:
   - SetTransformPositionToParentRPC
   - LogRPC
   - SetModeRPC
+  - SwitchTurnRPC
+  - SetTurnMasterClient
+  - SetTurnNotMasterClient
+  - RestartNotMasterClientWorkQueueRPC
+  - StopNotMasterClientWorkQueueRPC
+  - RestartWorkQueueRPC_
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

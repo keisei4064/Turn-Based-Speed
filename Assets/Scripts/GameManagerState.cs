@@ -61,6 +61,7 @@ class PrepareCardState : GameManagerState
         m_gameStatus.m_nowMode = GameStatus.Mode.PREPARE_CARD;
         Debug.Log("Gamemode: PREPARE_CARD");
 
+        SyncManager.Instance.StopNotMasterClientWorkQueue();
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("自身がマスタークライアントです");
@@ -78,13 +79,16 @@ class PrepareCardState : GameManagerState
                     MakeInitialTrash,
 
                     // TODO: どっちから始めるか
-                    m_gameStatus.SetTurnRandom
-                );
+                    m_gameStatus.SetTurnRandom,
+
+                    SyncManager.Instance.RestartWorkQueueRPC
+                ) ;
         }
         else
         {
             Debug.Log("自身はマスタークライアントではありません");
         }
+
 
 
         // 次のState登録
@@ -191,9 +195,6 @@ class PrepareCardState : GameManagerState
         m_OppoDeck.Shuffle();
         SyncManager.Instance.Log("shuffled");
     }
-
-    [PunRPC]
-
 
     void MakeInitialHands()
     {
@@ -325,9 +326,17 @@ class PlayingState : GameManagerState
             AnimationQueue.Instance.AddAnimToLastIndex(m_UIManager.Anim_Transition("Opponent Turn"));
         }
 
+        // 自分のターンじゃないときはWorkQueueを止めて待機
+        if (!m_gameStatus.IsMyTurn())
+        {
+            Debug.Log("not my turn");
+
+            WorkQueue.Instance.Stop();
+            WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
+            return;
+        }
 
         AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
-        WorkQueue.Instance.Stop();
 
         Action commonPressedBehave = () =>
         {
@@ -768,6 +777,7 @@ class PlayingState : GameManagerState
         m_UIManager.TurnEndButton.ClearPressedBehave();
         m_gameStatus.SwitchTurn();
         WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
+        SyncManager.Instance.RestartWorkQueueRPC();
     }
 }
 

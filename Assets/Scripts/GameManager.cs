@@ -76,8 +76,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         m_OppoHand = m_OppoHandObj.GetComponent<Hand>();
         m_UIManager = m_UIManagerObj.GetComponent<UIManager>();
 
-        m_gameStatus = new GameStatus();
-
         //Cardのシリアライズルール登録
         Card.RegisterSerializeRule();
     }
