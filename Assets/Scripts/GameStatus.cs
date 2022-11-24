@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameStatus
+using Photon.Pun;
+
+public class GameStatus: MonoBehaviourPunCallbacks
 {
     public enum Mode
     {
@@ -23,8 +25,8 @@ public class GameStatus
     }
     public enum Turn
     {
-        MY_TURN,
-        OPPO_TURN,
+        MASTER_CLIENT_TURN,
+        NOT_MASTER_CLIENT_TURN,
     }
 
 
@@ -42,42 +44,56 @@ public class GameStatus
     {
         UnityEngine.Random.InitState(Environment.TickCount);
         int zeroOrOne = (int)(0.5f + UnityEngine.Random.value);
-        bool isMyTurn = (zeroOrOne == 0);
-        if (isMyTurn)
+        bool isMasterTurn = (zeroOrOne == 0);
+        if (isMasterTurn)
         {
-            m_turn = Turn.MY_TURN;
+            //m_turn = Turn.MASTER_CLIENT_TURN;
+            photonView.RPC(nameof(SetTurnMasterClient), RpcTarget.AllBuffered);
         }
         else
         {
-            m_turn = Turn.OPPO_TURN;
+            //m_turn = Turn.NOT_MASTER_CLIENT_TURN;
+            photonView.RPC(nameof(SetTurnNotMasterClient), RpcTarget.AllBuffered);
         }
         Debug.Log("Result of SetTurnRandom: m_turn == " + m_turn.ToString());
     }
     public bool IsMyTurn()
     {
-        return m_turn == Turn.MY_TURN;
-    }
-    public bool IsOppoTurn()
-    {
-        return m_turn == Turn.OPPO_TURN;
-    }
-    public void SetTurnToMyTurn()
-    {
-        m_turn = Turn.MY_TURN;
-    }
-    public void SetTurnToOppoTurn()
-    {
-        m_turn = Turn.OPPO_TURN;
-    }
-    public void SwitchTurn()
-    {
-        if (m_turn == Turn.MY_TURN)
+        bool is_my_turn = false;
+        if (PhotonNetwork.IsMasterClient)
         {
-            m_turn = Turn.OPPO_TURN;
+            is_my_turn = (m_turn == Turn.MASTER_CLIENT_TURN);
         }
         else
         {
-            m_turn = Turn.MY_TURN;
+            is_my_turn = (m_turn == Turn.NOT_MASTER_CLIENT_TURN);
+        }
+        return is_my_turn;
+    }
+    public void SwitchTurn()
+    {
+        if (m_turn == Turn.MASTER_CLIENT_TURN)
+        {
+            photonView.RPC(nameof(SetTurnNotMasterClient), RpcTarget.AllBuffered);
+        }
+        else
+        {
+            photonView.RPC(nameof(SetTurnMasterClient), RpcTarget.AllBuffered);
         }
     }
+
+    [PunRPC]
+    private void SetTurnMasterClient()
+    {
+        //Debug.Log("set turn to master");
+        m_turn = Turn.MASTER_CLIENT_TURN;
+    }
+
+    [PunRPC]
+    private void SetTurnNotMasterClient()
+    {
+        //Debug.Log("set turn to not master");
+        m_turn = Turn.NOT_MASTER_CLIENT_TURN;
+    }
+
 }
