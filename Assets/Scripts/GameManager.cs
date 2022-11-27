@@ -201,7 +201,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
             for (Card.Suit s = Card.Suit.Club; s <= Card.Suit.Spade; s++)
             {
-                for (int i = 1; i <= 13; i++)
+                for (int i = 1; i <= 2; i++)
                 {
                     //Image newCardImageObj = Image.Instantiate(m_ImageCardPrefab);
                     Image newCardImageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
@@ -397,8 +397,9 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 Debug.Log("not my turn");
 
-                WorkQueue.Instance.Stop();
-                WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
+                //WorkQueue.Instance.Stop();
+                //WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
+                WorkQueue.Instance.EnqueueLoopFunc(WaitMyTurn);
                 return;
             }
 
@@ -573,11 +574,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             // Œˆ’…
             if (m_handlingDeck.m_cards.Count == 0 && m_handlingHand.m_cards.Count == 0)
             {
-                bool isPlayerWinner = m_gameStatus.IsMyTurn();
-                WorkQueue.Instance.EnqueueOnceRunFunc(() =>
-                {
-                    m_nextState = new ResultState(isPlayerWinner);
-                });
+                GameManager.Instance.StateTransitionToResultState();
                 return;
             }
 
@@ -843,6 +840,18 @@ public class GameManager : MonoBehaviourPunCallbacks
             WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
             SyncManager.Instance.RestartWorkQueueRPC();
         }
+
+        bool WaitMyTurn()
+        {
+            if ((m_MyDeck.m_cards.Count == 0 && m_MyHand.m_cards.Count == 0) ||
+                (m_OppoDeck.m_cards.Count == 0 && m_OppoHand.m_cards.Count == 0)) return true;
+            bool isMyTurn = m_gameStatus.IsMyTurn();
+            if (isMyTurn)
+            {
+                WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
+            }
+            return isMyTurn;
+        }
     }
 
     class ResultState : GameManagerState
@@ -869,4 +878,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    void StateTransitionToResultState()
+    {
+        photonView.RPC(nameof(StateTransitionToResultStateRPC), RpcTarget.AllBuffered);
+    }
+    [PunRPC]
+    void StateTransitionToResultStateRPC()
+    {
+        bool isPlayerWinner = m_gameStatus.IsMyTurn();
+        WorkQueue.Instance.EnqueueOnceRunFunc(() =>
+        {
+            m_nextState = new ResultState(isPlayerWinner);
+        });
+        return;
+    }
 }

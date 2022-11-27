@@ -2,22 +2,28 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 
 // 登録された関数を順次実行するクラス
-public class WorkQueue
+public class WorkQueue : MonoBehaviourPunCallbacks
 {
     // シングルトン
-    static private WorkQueue m_instance;
+    static private WorkQueue instance;
     public static WorkQueue Instance
     {
         get
         {
-            if (m_instance == null)
+            if (instance == null)
             {
-                m_instance = new WorkQueue();
+                //instance = new WorkQueue();
+                instance = (WorkQueue)FindObjectOfType(typeof(WorkQueue));
+                if (null == instance)
+                {
+                    Debug.Log(" AnimationQueue Instance Error ");
+                }
             }
-            return m_instance;
+            return instance;
         }
     }
     private WorkQueue()
@@ -55,7 +61,6 @@ public class WorkQueue
     //一度しか実行しない関数を登録
     public void EnqueueOnceRunFunc(Action action, bool waitForAnimationEnd = true)
     {
-
         if (waitForAnimationEnd)
         {
             m_Funcs.Enqueue(AnimationQueue.Instance.IsAllAnimationEnd);
@@ -70,6 +75,7 @@ public class WorkQueue
         {
             Debug.LogError("Count of m_Funcs is more than 100.");
         }
+
     }
 
     //一度しか実行しない関数をまとめて登録
