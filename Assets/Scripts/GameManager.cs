@@ -201,7 +201,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
             for (Card.Suit s = Card.Suit.Club; s <= Card.Suit.Spade; s++)
             {
-                for (int i = 1; i <= 2; i++)
+                for (int i = 1; i <= 13; i++)
                 {
                     //Image newCardImageObj = Image.Instantiate(m_ImageCardPrefab);
                     Image newCardImageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
@@ -230,11 +230,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             // 位置の整列
             foreach (Card card in m_RootDeck.m_cards)
             {
-                //card.transform.position = m_RootDeck.transform.position;
                 card.SetTransformPositionToParent();
             }
-            //joker1.transform.position = m_RightTrush.transform.position;
-            //joker2.transform.position = m_LeftTrush.transform.position;
             joker1.SetTransformPositionToParent();
             joker2.SetTransformPositionToParent();
             m_RootDeck.SetViewOrder();
@@ -259,12 +256,6 @@ public class GameManager : MonoBehaviourPunCallbacks
                 int waitFrames = 10 + i;
                 m_MyDeck.AddCardWithDelay(card1, waitFrames);
                 m_OppoDeck.AddCardWithDelay(card2, waitFrames);
-
-                //// アニメーション処理
-                //IEnumerator<bool> animRetVal1 = card1.Anim_StraightLineMove(myDeckPositon);
-                //IEnumerator<bool> animRetVal2 = card2.Anim_StraightLineMove(oppoDeckPositon);
-                //AnimationQueue.Instance.AddAnimToLastIndex(animRetVal1, waitFrames);
-                //AnimationQueue.Instance.AddAnimToLastIndex(animRetVal2, waitFrames);
             }
 
             //ジョーカー
@@ -392,13 +383,11 @@ public class GameManager : MonoBehaviourPunCallbacks
                 AnimationQueue.Instance.AddAnimToLastIndex(m_UIManager.Anim_Transition("Opponent Turn"));
             }
 
-            // 自分のターンじゃないときはWorkQueueを止めて待機
+            // 自分のターンがくるまで待機
             if (!m_gameStatus.IsMyTurn())
             {
                 Debug.Log("not my turn");
 
-                //WorkQueue.Instance.Stop();
-                //WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
                 WorkQueue.Instance.EnqueueLoopFunc(WaitMyTurn);
                 return;
             }

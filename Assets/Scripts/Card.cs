@@ -22,7 +22,6 @@ public class Card : HoldCardObject,
     }
     public Suit m_suit { get; private set; }
     public int m_num;
-    //{ get; private set; }
     public bool m_isFront { get; private set; }
     public Image m_attachedObject;
     public GameObject m_canDragSign;
@@ -47,12 +46,10 @@ public class Card : HoldCardObject,
         CONTAINED
     }
     public MODE m_mode { get; private set; }
-    //public MODE m_mode;
 
     //flags
     public bool m_isDragging { get; private set; } = false;
-    public bool m_canDrag;
-    //{ get; private set; }
+    public bool m_canDrag { get; private set; }
 
     private void Awake()
     {
@@ -303,10 +300,6 @@ public class Card : HoldCardObject,
     public IEnumerator<bool> Anim_StraightLineMove(Vector3 afterPosition, int frameToSpend = 20)
     {
         //Debug.Log("Anim_StraightLineMove start");
-        //Transform originLayer = this.transform.parent;
-        //if (originLayer == null)
-        //    Debug.LogError("couldn't find canvas.");
-
         this.transform.SetParent(GameManager.Instance.m_TopLayerCanvas.transform);
         foreach (Card card in m_cards)
         {
@@ -422,7 +415,6 @@ public class Card : HoldCardObject,
         }
     }
 
-    // TODO: çáê¨Ç∆à≥èkÇ™éÛêMë§ÇæÇ∆ï™Ç©ÇÁÇ»Ç¢
     [PunRPC]
     override public void AddCardRPC(Card card, bool doAnim)
     {
@@ -530,9 +522,6 @@ public class Card : HoldCardObject,
     public void SetModeRPC(MODE mode)
     {
         m_mode = mode;
-        //m_compressedSign.gameObject.SetActive(m_mode == MODE.COMPRESSED || m_mode == MODE.COMPRESSING);
-        //m_combinedSign.gameObject.SetActive(m_mode == MODE.COMBINED);
-
         if (m_mode == MODE.CONTAINED)
         {
             this.GetComponent<Image>().raycastTarget = false;
@@ -603,12 +592,10 @@ public class Card : HoldCardObject,
         if (stream.IsWriting)
         {
             stream.SendNext(this.name);
-            //stream.SendNext(this.m_mode);
         }
         else
         {
             this.name = (String)stream.ReceiveNext();
-            //this.m_mode = (MODE)stream.ReceiveNext();
         }
     }
 }

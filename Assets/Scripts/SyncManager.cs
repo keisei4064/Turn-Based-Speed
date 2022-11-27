@@ -32,8 +32,6 @@ public class SyncManager : MonoBehaviourPunCallbacks
 
     public void RegistCardInstance(Card card)
     {
-        //int num = card.m_num;
-        //Card.Suit suit = card.m_suit;
         int index = card.m_sync_id;
 
         Debug.Assert(index < 54 & index >= 0);

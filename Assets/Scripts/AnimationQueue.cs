@@ -14,7 +14,6 @@ public class AnimationQueue : MonoBehaviourPunCallbacks
         {
             if(instance == null)
             {
-                //instance = new AnimationQueue();
                 instance = (AnimationQueue)FindObjectOfType(typeof(AnimationQueue));
                 if (null == instance)
                 {
@@ -110,8 +109,6 @@ public class AnimationQueue : MonoBehaviourPunCallbacks
             action();
             yield return true;
         }
-        //MethodAndWaitFrames additionalMethod = new MethodAndWaitFrames(enumerator());
-        //m_animMethods[m_animMethods.Count - 1].Add(additionalMethod);
         AddAnimToLastIndex(enumerator());
     }
     public void CreateNewEmptyAnimListToEnd()
