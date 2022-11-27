@@ -47,7 +47,6 @@ public class Hand : HoldCardObject
             Debug.LogError("Hand can't have more card than MAX_CARDS_NUM.");
         }
 
-        //base.AddCard(card, doAnim);
         base.AddCardRPC(card, doAnim);
 
         // アニメーション処理

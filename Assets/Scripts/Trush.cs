@@ -16,20 +16,6 @@ public class Trush : Deck
         DisableMask();
     }
 
-    //public void DoDiscardAnim(bool ifTurnover)
-    //{
-    //    if (ifTurnover)
-    //    {
-    //        AnimationQueue.Instance.AddAnimToLastIndex(
-    //            m_cards[m_cards.Count - 1].Anim_StraightLineMoveWithTurnOver(this.transform.position));
-    //    }
-    //    else
-    //    {
-    //        AnimationQueue.Instance.AddAnimToLastIndex(
-    //            m_cards[m_cards.Count - 1].Anim_StraightLineMove(this.transform.position));
-    //    }
-    //}
-
     // AddCardRPCÇÃÉâÉbÉpä÷êî
     override public void AddCard(Card card, bool doAnim = true, bool doSync = true)
     {

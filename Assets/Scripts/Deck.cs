@@ -46,7 +46,6 @@ public class Deck : HoldCardObject
     [PunRPC]
     override public void AddCardRPC(Card card, bool doAnim)
     {
-        //base.AddCard(card, doAnim);
         base.AddCardRPC(card, doAnim);
 
         if (doAnim)

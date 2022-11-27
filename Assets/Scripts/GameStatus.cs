@@ -47,12 +47,10 @@ public class GameStatus: MonoBehaviourPunCallbacks
         bool isMasterTurn = (zeroOrOne == 0);
         if (isMasterTurn)
         {
-            //m_turn = Turn.MASTER_CLIENT_TURN;
             photonView.RPC(nameof(SetTurnMasterClient), RpcTarget.AllBuffered);
         }
         else
         {
-            //m_turn = Turn.NOT_MASTER_CLIENT_TURN;
             photonView.RPC(nameof(SetTurnNotMasterClient), RpcTarget.AllBuffered);
         }
         Debug.Log("Result of SetTurnRandom: m_turn == " + m_turn.ToString());

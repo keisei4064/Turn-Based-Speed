@@ -7,7 +7,7 @@ using Photon.Pun;
 public abstract class HoldCardObject : MonoBehaviourPunCallbacks
 {
     //m_cards[0]が一番下
-    public List<Card> m_cards;// { get; protected set; }
+    public List<Card> m_cards;
 
     public GameObject m_dropRange;
     public GameObject m_canDropSign;
@@ -30,9 +30,8 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
     {
         Debug.Assert(card != null);
 
-        //Transform canvas = card.transform.parent; // Canvas <- Card
         Transform canvas = card.m_parent_canvas_transform; // Canvas <- Card
-        if (canvas != null) //XXX: parentが取得できない
+        if (canvas != null)
         {
             Transform parent = canvas.parent; // HoldCardObject <- Canvas
             Debug.Assert(parent != null);
@@ -40,7 +39,6 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
             parent.GetComponent<HoldCardObject>().RemoveCard(card, true);
         }
 
-        //card.transform.SetParent(this.transform.Find("Canvas").transform); // Cardの親をこのオブジェクトに設定
         card.SetParentCanvas(this.transform.Find("Canvas").transform);  // Cardの親をこのオブジェクトに設定
         m_cards.Add(card);
         card.transform.SetAsLastSibling(); // 描写を一番最後に設定
