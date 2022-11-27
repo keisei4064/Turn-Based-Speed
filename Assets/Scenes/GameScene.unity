@@ -766,9 +766,9 @@ MonoBehaviour:
   m_MyHandObj: {fileID: 6110313392621210868}
   m_OppoHandObj: {fileID: 1937812005}
   m_UIManagerObj: {fileID: 277279292}
+  m_GameStatusObj: {fileID: 1901495451}
   m_ImageCardPrefab: {fileID: 659540207005596476, guid: 9be9e888a3027674e8aaa831cccb76ea, type: 3}
   m_TopLayerCanvas: {fileID: 1048484476}
-  m_gameStatus: {fileID: 1901495452}
 --- !u!4 &425787187
 Transform:
   m_ObjectHideFlags: 0
