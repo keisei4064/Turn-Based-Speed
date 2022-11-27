@@ -54,9 +54,9 @@ public class UIManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        m_myOrOppoTurn.enabled = GameManager.Instance.m_gameStatus.m_nowMode == GameStatus.Mode.PLAYING;
+        m_myOrOppoTurn.enabled = GameManager.m_gameStatus.m_nowMode == GameStatus.Mode.PLAYING;
 
-        if (GameManager.Instance.m_gameStatus.IsMyTurn())
+        if (GameManager.m_gameStatus.IsMyTurn())
         {
             m_myOrOppoTurn.text = "Your Turn";
         }
