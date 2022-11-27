@@ -87,6 +87,14 @@ class PrepareCardState : GameManagerState
         else
         {
             Debug.Log("自身はマスタークライアントではありません");
+            // 自分の場とするオブジェクトの入れ替え
+            (m_MyDeck, m_OppoDeck) = (m_OppoDeck, m_MyDeck);
+            (m_RightTrush, m_LeftTrush) = (m_LeftTrush, m_RightTrush);
+            (m_MyHand, m_OppoHand) = (m_OppoHand, m_MyHand);
+            (m_MyDeck.transform.position, m_OppoDeck.transform.position) = (m_OppoDeck.transform.position, m_MyDeck.transform.position);
+            (m_RightTrush.transform.position, m_LeftTrush.transform.position) = (m_LeftTrush.transform.position, m_RightTrush.transform.position);
+            (m_MyHand.transform.position, m_OppoHand.transform.position) = (m_OppoHand.transform.position, m_MyHand.transform.position);
+            (m_MyHand.transform.rotation, m_OppoHand.transform.rotation) = (m_OppoHand.transform.rotation, m_MyHand.transform.rotation);
         }
 
 
@@ -243,6 +251,10 @@ class PrepareCardState : GameManagerState
             dealDeck = m_OppoDeck;
             dealTrush = m_LeftTrush;
         }
+    }
+
+    void PutObjectToAppropriatePosition() { 
+
     }
 }
 

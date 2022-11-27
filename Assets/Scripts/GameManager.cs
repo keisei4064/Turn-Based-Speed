@@ -49,8 +49,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     //private GameStatus m_gameStatus { get; protected set; }
     public GameStatus m_gameStatus;
 
-    //WorkQueue WorkQueue.Instance;
-
+    public GameManagerState[] m_gameManagerStates = new GameManagerState[4];
     GameManagerState m_nowState;
 
     private void Awake()
