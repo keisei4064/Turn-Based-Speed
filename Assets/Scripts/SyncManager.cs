@@ -64,25 +64,4 @@ public class SyncManager : MonoBehaviourPunCallbacks
         Debug.Log(str);
     }
 
-    public void StopNotMasterClientWorkQueue()
-    {
-        photonView.RPC(nameof(StopNotMasterClientWorkQueueRPC), RpcTarget.AllBuffered);
-    }
-    [PunRPC]
-    private void StopNotMasterClientWorkQueueRPC()
-    {
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            WorkQueue.Instance.Stop();
-        }
-    }
-    public void RestartWorkQueueRPC()
-    {
-        photonView.RPC(nameof(RestartWorkQueueRPC_), RpcTarget.AllBuffered);
-    }
-    [PunRPC]
-    private void RestartWorkQueueRPC_()
-    {
-        WorkQueue.Instance.Restart();
-    }
 }

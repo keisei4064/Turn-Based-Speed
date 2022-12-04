@@ -56,6 +56,8 @@ MonoBehaviour:
   - StopNotMasterClientWorkQueueRPC
   - RestartWorkQueueRPC_
   - StateTransitionToResultStateRPC
+  - Restart
+  - StopNotMasterClientRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0
