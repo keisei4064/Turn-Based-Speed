@@ -9,9 +9,12 @@ using System;
 public class Button : MonoBehaviour
 {
     static Color enabledButtonColor { get; } = new Color(0.3f, 0.3f, 0.3f, 1);
-    static Color enabledTextColor { get; } = new Color(1, 1, 1, 1);
     static Color disabledButtonColor { get; } = new Color(0.3f, 0.3f, 0.3f, 0.4f);
-    static Color disabledTextColor { get; } = new Color(1, 1, 1, 0.4f);
+
+    [SerializeField]
+    Color enabledTextColor = new Color(1, 1, 1, 1);
+    [SerializeField]
+    Color disabledTextColor = new Color(1, 1, 1, 0.4f);
 
     private Action m_ButtonPressedBehave;
     bool m_isEnabled;
