@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 using System;
 
@@ -43,13 +44,13 @@ public class Button : MonoBehaviour
         m_isEnabled = true;
         m_button.interactable = true;
         //this.GetComponent<Image>().color = enabledButtonColor;
-        this.GetComponentInChildren<Text>().color = enabledTextColor;
+        this.GetComponentInChildren<TextMeshProUGUI>().color = enabledTextColor;
     }
     public void Disable()
     {
         m_isEnabled = false;
         m_button.interactable = false;
         //this.GetComponent<Image>().color = disabledButtonColor;
-        this.GetComponentInChildren<Text>().color = disabledTextColor;
+        this.GetComponentInChildren<TextMeshProUGUI>().color = disabledTextColor;
     }
 }
