@@ -32,12 +32,6 @@ public class UIManager : MonoBehaviour
         CompressButton = CompressButtonObj.GetComponent<Button>();
         TurnEndButton = TurnEndButtonObj.GetComponent<Button>();
 
-        DrawButton.Disable();
-        DiscardButton.Disable();
-        CombineButton.Disable();
-        CompressButton.Disable();
-        TurnEndButton.Disable();
-
         transitionAnimator = TransitionObj.GetComponent<Animator>();
     }
 

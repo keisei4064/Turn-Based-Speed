@@ -14,6 +14,14 @@ public class Button : MonoBehaviour
 
     private Action m_ButtonPressedBehave;
     bool m_isEnabled;
+    private UnityEngine.UI.Button m_button;
+
+    private void Awake()
+    {
+        m_button = GetComponent<UnityEngine.UI.Button>();
+        Debug.Assert(m_button != null);
+        Disable();
+    }
 
     public void RegistPressedBehave(Action action)
     {
@@ -27,20 +35,21 @@ public class Button : MonoBehaviour
     {
         if (m_isEnabled == false) return;
 
-        Debug.Log("TurnEndButtonClicked");
         if (m_ButtonPressedBehave != null)
             m_ButtonPressedBehave();
     }
     public void Enable()
     {
         m_isEnabled = true;
-        this.GetComponent<Image>().color = enabledButtonColor;
+        m_button.interactable = true;
+        //this.GetComponent<Image>().color = enabledButtonColor;
         this.GetComponentInChildren<Text>().color = enabledTextColor;
     }
     public void Disable()
     {
         m_isEnabled = false;
-        this.GetComponent<Image>().color = disabledButtonColor;
+        m_button.interactable = false;
+        //this.GetComponent<Image>().color = disabledButtonColor;
         this.GetComponentInChildren<Text>().color = disabledTextColor;
     }
 }

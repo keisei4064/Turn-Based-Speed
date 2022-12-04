@@ -92,8 +92,28 @@ public class WorkQueue : MonoBehaviourPunCallbacks
     {
         m_stop = true;
     }
+
+    [PunRPC]
     public void Restart()
     {
         m_stop = false;
+    }
+
+
+    public void StopNotMasterClient()
+    {
+        photonView.RPC(nameof(StopNotMasterClientRPC), RpcTarget.AllBuffered);
+    }
+    [PunRPC]
+    private void StopNotMasterClientRPC()
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            Stop();
+        }
+    }
+    public void RestartRPC()
+    {
+        photonView.RPC(nameof(Restart), RpcTarget.AllBuffered);
     }
 }

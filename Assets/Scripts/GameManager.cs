@@ -138,7 +138,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             m_gameStatus.m_nowMode = GameStatus.Mode.PREPARE_CARD;
             Debug.Log("Gamemode: PREPARE_CARD");
 
-            SyncManager.Instance.StopNotMasterClientWorkQueue();
+            WorkQueue.Instance.StopNotMasterClient();
             if (PhotonNetwork.IsMasterClient)
             {
                 Debug.Log("自身がマスタークライアントです");
@@ -158,7 +158,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                         // TODO: どっちから始めるか
                         m_gameStatus.SetTurnRandom,
 
-                        SyncManager.Instance.RestartWorkQueueRPC
+                        WorkQueue.Instance.RestartRPC
                     );
             }
             else
@@ -827,7 +827,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             m_UIManager.TurnEndButton.ClearPressedBehave();
             m_gameStatus.SwitchTurn();
             WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
-            SyncManager.Instance.RestartWorkQueueRPC();
+            WorkQueue.Instance.RestartRPC();
         }
 
         bool WaitMyTurn()
