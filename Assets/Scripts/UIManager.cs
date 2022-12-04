@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class UIManager : MonoBehaviour
     Animator transitionAnimator;
     public GameObject ResultObj;
 
-    public Text m_myOrOppoTurn;
+    public TextMeshProUGUI m_myOrOppoTurn;
 
 
     private void Awake()
@@ -62,7 +63,7 @@ public class UIManager : MonoBehaviour
     
     public IEnumerator<bool> Anim_Transition(string message)
     {
-        TransitionObj.transform.Find("Text").GetComponent<Text>().text = message;
+        TransitionObj.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = message;
         transitionAnimator.SetBool("active", true);
 
         int loss = 0;
@@ -89,13 +90,13 @@ public class UIManager : MonoBehaviour
         ResultObj.SetActive(true);
         if(isPlayerWinner)
         {
-            ResultObj.transform.Find("Text").GetComponent<Text>().text = "You Win";
+            ResultObj.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = "You Win";
             ResultObj.transform.Find("RedLine").gameObject.SetActive(true);
             ResultObj.transform.Find("BlueLine").gameObject.SetActive(false);
         }
         else
         {
-            ResultObj.transform.Find("Text").GetComponent<Text>().text = "You Lose";
+            ResultObj.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = "You Lose";
             ResultObj.transform.Find("RedLine").gameObject.SetActive(false);
             ResultObj.transform.Find("BlueLine").gameObject.SetActive(true);
         }
