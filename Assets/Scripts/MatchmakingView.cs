@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.UI;
+using TMPro;
 
 public class MatchmakingView : MonoBehaviourPunCallbacks
 {
     private RoomList m_roomList = new RoomList();
-    private List<RoomButton> m_roomButtonList = new List<RoomButton>();
+    [SerializeField]
+    private List<RoomButton> m_roomButtonList = new List<RoomButton>(5);
     private CanvasGroup m_canvasGroup;
+    [SerializeField]
+    private UnityEngine.UI.Button m_quickMatchButtonObj;
+    private Button m_quickMatchButton;
+
+    [SerializeField]
+    public TextMeshProUGUI m_statusText;
 
     // Start is called before the first frame update
     void Start()
@@ -17,14 +26,15 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
         m_canvasGroup.interactable = false;
 
         int roomId = 1;
-        foreach (Transform child in transform)
+        foreach (var button in m_roomButtonList)
         {
-            if (child.TryGetComponent<RoomButton>(out var roomButton))
-            {
-                roomButton.Init(this, roomId++);
-                m_roomButtonList.Add(roomButton);
-            }
+            button.Init(this, roomId++);
         }
+
+        m_quickMatchButton = m_quickMatchButtonObj.GetComponent<Button>();
+        m_quickMatchButton.RegistPressedBehave(OnQuickMatchButtonPushed);
+
+        m_statusText.enabled = false;
     }
 
     public override void OnJoinedLobby()
@@ -36,7 +46,8 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
     {
         m_roomList.Update(roomList);
 
-        foreach(var roomButton in m_roomButtonList)
+        bool is_exist_empty_room = false;
+        foreach (var roomButton in m_roomButtonList)
         {
             if (m_roomList.TryGetRoomInfo(roomButton.RoomName, out var roomInfo))
             {
@@ -46,21 +57,53 @@ public class MatchmakingView : MonoBehaviourPunCallbacks
             {
                 roomButton.SetPlayerCount(0);
             }
+            if (roomButton.IsAvailableToJoin())
+            {
+                is_exist_empty_room = true;
+            }
         }
+
+        m_quickMatchButton.SetIsInteractable(is_exist_empty_room);
     }
 
     public void OnJoiningRoom()
     {
         m_canvasGroup.interactable = false;
+        m_quickMatchButton.Disable();
     }
 
     public override void OnJoinedRoom()
     {
         //gameObject.SetActive(false);
+        m_statusText.enabled = true;
+        m_statusText.text = "ëŒêÌëäéËÇë“Ç¡ÇƒÇ¢Ç‹Ç∑ÅB";
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         m_canvasGroup.interactable = true;
+    }
+
+    public void OnQuickMatchButtonPushed()
+    {
+
+        foreach (var roomButton in m_roomButtonList)
+        {
+            if(roomButton.m_player_num == 1)
+            {
+                roomButton.OnButtonClick();
+                return;
+            }
+        }
+        foreach (var roomButton in m_roomButtonList)
+        {
+            // ãÛÇ¢ÇƒÇ¢ÇÈïîâÆÇÃÉ{É^ÉìÇ™âüÇ≥ÇÍÇΩÇ±Ç∆Ç…Ç∑ÇÈ
+            if (roomButton.IsAvailableToJoin())
+            {
+                roomButton.OnButtonClick();
+                return;
+            }
+        }
+        Debug.LogError("QuickMatchÇ…é∏îs");
     }
 }

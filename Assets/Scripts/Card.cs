@@ -62,10 +62,10 @@ public class Card : HoldCardObject,
 
         m_cards = new List<Card>();
         m_mode = MODE.SINGLE;
+
     }
     private void Start()
     {
-        transform.localScale = new Vector3(1, 1, 1);
         m_canDrag = false;
     }
     private void Update()
@@ -207,6 +207,8 @@ public class Card : HoldCardObject,
         m_sync_id = m_id_count;
         m_id_count++;
         SyncManager.Instance.RegistCardInstance(this);
+
+        transform.localScale = new Vector3(1, 1, 1);
     }
 
     static public void LoadImages()

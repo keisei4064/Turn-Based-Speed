@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -1.156}
-  m_SizeDelta: {x: 1.55, y: 0.04}
+  m_SizeDelta: {x: 1.5, y: 0.02}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7734809856938370449
 CanvasRenderer:
@@ -264,7 +264,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0.755, y: 0}
-  m_SizeDelta: {x: 0.04, y: 2.3}
+  m_SizeDelta: {x: 0.02, y: 2.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7324959206740992580
 CanvasRenderer:
@@ -313,13 +313,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6731944505228839197}
+  - component: {fileID: 5222142664851266795}
   m_Layer: 5
   m_Name: CombinedSign
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6731944505228839197
 RectTransform:
   m_ObjectHideFlags: 0
@@ -354,6 +355,26 @@ RectTransform:
   m_AnchoredPosition: {x: 1.2, y: 1.2}
   m_SizeDelta: {x: 2.5, y: 3.9246}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!95 &5222142664851266795
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3079706980322079035}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 976568026f5149c49968b4d890ac8720, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &4572962965486571483
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,7 +640,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -0.755, y: -0.755}
-  m_SizeDelta: {x: 0.1, y: 0.1}
+  m_SizeDelta: {x: 0.01, y: 0.01}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!96 &7451570866719629154
 TrailRenderer:
@@ -666,7 +687,7 @@ TrailRenderer:
   m_Time: 1
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.05
+    widthMultiplier: 0.1
     widthCurve:
       serializedVersion: 2
       m_Curve:
@@ -804,7 +825,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0.75501, y: -0.75499}
-  m_SizeDelta: {x: 0.1, y: 0.1}
+  m_SizeDelta: {x: 0.01, y: 0.01}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!96 &9143925831436617777
 TrailRenderer:
@@ -851,7 +872,7 @@ TrailRenderer:
   m_Time: 1
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.05
+    widthMultiplier: 0.1
     widthCurve:
       serializedVersion: 2
       m_Curve:
@@ -1042,7 +1063,6 @@ GameObject:
   - component: {fileID: 8056104079867500230}
   - component: {fileID: 5378668905580235913}
   - component: {fileID: 3901651184548308669}
-  - component: {fileID: 8764141410217190336}
   m_Layer: 5
   m_Name: ImageCard
   m_TagString: Untagged
@@ -1184,26 +1204,6 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!95 &8764141410217190336
-Animator:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7449178308282029581}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 1ff9bfce137247544adc97647ceaeacf, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &7467444436300002170
 GameObject:
   m_ObjectHideFlags: 0
@@ -1316,7 +1316,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 1.156}
-  m_SizeDelta: {x: 1.55, y: 0.04}
+  m_SizeDelta: {x: 1.5, y: 0.02}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9207351150961712640
 CanvasRenderer:
@@ -1772,7 +1772,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -0.755, y: 0}
-  m_SizeDelta: {x: 0.04, y: 2.3}
+  m_SizeDelta: {x: 0.02, y: 2.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8071549785635574561
 CanvasRenderer:

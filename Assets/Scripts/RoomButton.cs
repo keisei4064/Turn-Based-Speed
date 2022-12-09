@@ -9,6 +9,7 @@ using TMPro;
 public class RoomButton : MonoBehaviour
 {
     private const int MaxPlayers = 2;
+    public int m_player_num;
 
     [SerializeField]
     private TextMeshProUGUI m_label = default;
@@ -28,7 +29,7 @@ public class RoomButton : MonoBehaviour
         m_button.onClick.AddListener(OnButtonClick);
     }
 
-    private void OnButtonClick()
+    public void OnButtonClick()
     {
         m_matchmakingView.OnJoiningRoom();
 
@@ -39,7 +40,13 @@ public class RoomButton : MonoBehaviour
 
     public void SetPlayerCount(int playerCount)
     {
-        m_label.text = $"{RoomName}\n{playerCount} / {MaxPlayers}";
-        m_button.interactable = (playerCount < MaxPlayers);
+        m_player_num = playerCount;
+        m_label.text = $"{RoomName}\n{m_player_num} / {MaxPlayers}";
+        m_button.interactable = IsAvailableToJoin();
+    }
+
+    public bool IsAvailableToJoin()
+    {
+        return m_player_num < MaxPlayers;
     }
 }

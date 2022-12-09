@@ -56,4 +56,15 @@ public class Button : MonoBehaviour
         //this.GetComponent<Image>().color = disabledButtonColor;
         this.GetComponentInChildren<TextMeshProUGUI>().color = disabledTextColor;
     }
+    public void SetIsInteractable(bool is_interactable)
+    {
+        if (is_interactable)
+        {
+            Enable();
+        }
+        else
+        {
+            Disable();
+        }
+    }
 }
