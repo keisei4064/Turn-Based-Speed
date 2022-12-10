@@ -79,6 +79,8 @@ public class Hand : HoldCardObject
         //ÉJÅ[ÉhÇÃó†ï‘Çµ
         if (m_cards[m_cards.Count - 1].m_isFront != this.m_isFront)
         {
+
+            m_cards[m_cards.Count - 1].TurnOver();
             AnimationQueue.Instance.AddAnimToLastIndex(m_cards[m_cards.Count - 1].Anim_TurnOver(frameToSpend));
         }
     }

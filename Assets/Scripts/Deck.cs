@@ -9,7 +9,7 @@ using Photon.Pun;
 public class Deck : HoldCardObject
 {
     public bool m_canDrop;
-    public bool m_isFront { get; protected set; }
+    public bool m_isFront;
 
     private void Awake()
     {
@@ -57,6 +57,7 @@ public class Deck : HoldCardObject
             }
             else
             {
+                card.TurnOver();
                 AnimationQueue.Instance.AddAnimToLastIndex(card.Anim_StraightLineMoveWithTurnOver(this.gameObject.transform.position));
             }
         }
@@ -78,6 +79,7 @@ public class Deck : HoldCardObject
         }
         else
         {
+            card.TurnOver();
             AnimationQueue.Instance.AddAnimToLastIndex(card.Anim_StraightLineMoveWithTurnOver(this.gameObject.transform.position), waitFrames);
         }
     }

@@ -1063,6 +1063,7 @@ GameObject:
   - component: {fileID: 8056104079867500230}
   - component: {fileID: 5378668905580235913}
   - component: {fileID: 3901651184548308669}
+  - component: {fileID: 3870701622080582467}
   m_Layer: 5
   m_Name: ImageCard
   m_TagString: Untagged
@@ -1080,7 +1081,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 8372257575609628724}
   - {fileID: 7433672209530264891}
@@ -1110,7 +1111,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7449178308282029581}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -1149,6 +1150,7 @@ MonoBehaviour:
   m_dropRange: {fileID: 8648115263376747959}
   m_canDropSign: {fileID: 195683415991407546}
   m_num: 0
+  m_isFront: 0
   m_attachedObject: {fileID: 0}
   m_canDragSign: {fileID: 8213642365316401266}
   m_combinedSign: {fileID: 3079706980322079035}
@@ -1204,6 +1206,25 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!1818360610 &3870701622080582467
+ScaleConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7449178308282029581}
+  m_Enabled: 0
+  m_Weight: 1
+  m_ScaleAtRest: {x: 1, y: 1, z: 1}
+  m_ScaleOffset: {x: 1, y: 1, z: 1}
+  m_AffectScalingX: 1
+  m_AffectScalingY: 1
+  m_AffectScalingZ: 1
+  m_IsContraintActive: 1
+  m_IsLocked: 1
+  m_Sources:
+  - sourceTransform: {fileID: 0}
+    weight: 1
 --- !u!1 &7467444436300002170
 GameObject:
   m_ObjectHideFlags: 0

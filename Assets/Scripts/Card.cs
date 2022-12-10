@@ -10,7 +10,7 @@ using Photon.Pun;
 
 public class Card : HoldCardObject,
                     IDragHandler, IBeginDragHandler, IEndDragHandler,
-                    IPunObservable
+                    IPunObservable, IPunInstantiateMagicCallback
 {
     public enum Suit
     {
@@ -22,7 +22,8 @@ public class Card : HoldCardObject,
     }
     public Suit m_suit { get; private set; }
     public int m_num;
-    public bool m_isFront { get; private set; }
+    public bool m_isFront; //処理における表裏
+    public bool m_isImageFront; // 表示における表裏
     public Image m_attachedObject;
     public GameObject m_canDragSign;
     public GameObject m_combinedSign;
@@ -62,7 +63,6 @@ public class Card : HoldCardObject,
 
         m_cards = new List<Card>();
         m_mode = MODE.SINGLE;
-
     }
     private void Start()
     {
@@ -201,14 +201,13 @@ public class Card : HoldCardObject,
         m_suit = suitVal;
         m_num = numVal;
         m_isFront = isFront;
+        m_isImageFront = isFront;
         LoadImages();
         m_attachedObject.sprite = GetImage();
 
         m_sync_id = m_id_count;
         m_id_count++;
         SyncManager.Instance.RegistCardInstance(this);
-
-        transform.localScale = new Vector3(1, 1, 1);
     }
 
     static public void LoadImages()
@@ -256,7 +255,7 @@ public class Card : HoldCardObject,
             }
         }
 
-        if (!m_isFront)
+        if (!m_isImageFront)
             fileName = "BackColor_Black";
 
         foreach (Sprite sprite in m_sprites)
@@ -283,7 +282,9 @@ public class Card : HoldCardObject,
             yield return false;
         }
 
-        TurnOver();
+        // Imageを裏返す
+        m_isImageFront = !m_isImageFront;
+        m_attachedObject.sprite = GetImage();
 
         rotateAnglePerFrame = 90 / (float)AfterTurnOverframe;
         for (int i = 0; i < AfterTurnOverframe; i++)
@@ -389,20 +390,19 @@ public class Card : HoldCardObject,
     public void TurnOver()
     {
         m_isFront = !m_isFront;
-        m_attachedObject.sprite = GetImage();
     }
 
-    public void TurnIntoFront()
-    {
-        m_isFront = true;
-        m_attachedObject.sprite = GetImage();
-    }
+    //public void TurnIntoFront()
+    //{
+    //    m_isFront = true;
+    //    m_attachedObject.sprite = GetImage();
+    //}
 
-    public void TurnIntoBack()
-    {
-        m_isFront = false;
-        m_attachedObject.sprite = GetImage();
-    }
+    //public void TurnIntoBack()
+    //{
+    //    m_isFront = false;
+    //    m_attachedObject.sprite = GetImage();
+    //}
 
     // AddCardRPCのラッパ関数
     override public void AddCard(Card card, bool doAnim = true, bool doSync = true)
@@ -550,6 +550,10 @@ public class Card : HoldCardObject,
     private void SetTransformPositionToParentRPC()
     {
         this.transform.position = this.transform.parent.position;
+        transform.localScale = new Vector3(1, 1, 1);
+
+        // 大きさが適切に設定された時点で表示を有効にする
+        GetComponent<Image>().enabled = true;
     }
 
     public void SetParentCanvas(Transform canvas)
@@ -599,5 +603,10 @@ public class Card : HoldCardObject,
         {
             this.name = (String)stream.ReceiveNext();
         }
+    }
+
+    public void OnPhotonInstantiate(PhotonMessageInfo info)
+    {
+        // インスタンス化された時の処理
     }
 }

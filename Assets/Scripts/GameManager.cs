@@ -193,7 +193,6 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
 
         // -------------------------------------------------------------------------------------------------------
-        // TODO:ジョーカーでばぐってる
         void MakeAllCardsToRootDeck()
         {
             Debug.Log("Making All Root Deck's Cards");
@@ -201,11 +200,13 @@ public class GameManager : MonoBehaviourPunCallbacks
             AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
             for (Card.Suit s = Card.Suit.Club; s <= Card.Suit.Spade; s++)
             {
-                for (int i = 1; i <= 13; i++)
+                for (int i = 1; i <= 4; i++)
                 {
                     //Image newCardImageObj = Image.Instantiate(m_ImageCardPrefab);
                     Image newCardImageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
+
                     Card newCard = newCardImageObj.GetComponent<Card>();
+
                     newCard.Initialize(s, i);
                     newCard.name = s.ToString() + "_" + i.ToString();
 
@@ -299,9 +300,9 @@ public class GameManager : MonoBehaviourPunCallbacks
                     if (dealTrush.GetTopCard().m_suit == Card.Suit.Joker)
                     {
                         Card joker = dealTrush.DrawCard();
-                        dealDeck.AddCard(joker, false);
                         AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
-                        AnimationQueue.Instance.AddAnimToLastIndex(joker.Anim_StraightLineMoveWithTurnOver(dealDeck.gameObject.transform.position), 20);
+                        Debug.Log("joker.m_isFront: " + joker.m_isFront);
+                        dealDeck.AddCard(joker, true);
 
                         AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
                         dealDeck.Shuffle();
@@ -309,14 +310,46 @@ public class GameManager : MonoBehaviourPunCallbacks
                         //引き直し
                         AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
                         Card newDrawCard = dealDeck.DrawCard();
-                        dealTrush.AddCard(newDrawCard, false);
-                        AnimationQueue.Instance.AddAnimToLastIndex(newDrawCard.Anim_StraightLineMoveWithTurnOver(dealTrush.gameObject.transform.position));
+
+                        dealTrush.AddCard(newDrawCard, true);
                     }
                 }
                 dealDeck = m_OppoDeck;
                 dealTrush = m_LeftTrush;
             }
         }
+        //bool RemakeTrushUntilNotJoker()
+        //{
+        //    //ジョーカーが出てしまった場合
+        //    Deck dealDeck = m_MyDeck;
+        //    Trush dealTrush = m_RightTrush;
+        //    for (int i = 0; i < 2; ++i)
+        //    {
+        //        while (dealTrush.GetTopCard().m_suit == Card.Suit.Joker)
+        //        {
+        //            Debug.Log("joker is invalid for initial Trush.");
+
+        //            if (dealTrush.GetTopCard().m_suit == Card.Suit.Joker)
+        //            {
+        //                Card joker = dealTrush.DrawCard();
+        //                AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
+        //                Debug.Log("joker.m_isFront: " + joker.m_isFront);
+        //                dealDeck.AddCard(joker, true);
+
+        //                AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
+        //                dealDeck.Shuffle();
+
+        //                //引き直し
+        //                AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
+        //                Card newDrawCard = dealDeck.DrawCard();
+
+        //                dealTrush.AddCard(newDrawCard, true);
+        //            }
+        //        }
+        //        dealDeck = m_OppoDeck;
+        //        dealTrush = m_LeftTrush;
+        //    }
+        //}
 
         void PutObjectToAppropriatePosition()
         {

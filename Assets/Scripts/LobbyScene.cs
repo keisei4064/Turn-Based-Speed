@@ -34,8 +34,13 @@ public class LobbyScene : MonoBehaviourPunCallbacks
                 //PhotonNetwork.CurrentRoom.IsOpen = false;
 
                 PhotonNetwork.IsMessageQueueRunning = false;
-                PhotonNetwork.LoadLevel("GameScene");
+                Invoke(nameof(LoadGameScene), 0f);
             }
         }
+    }
+
+    private void LoadGameScene()
+    {
+        PhotonNetwork.LoadLevel("GameScene");
     }
 }
