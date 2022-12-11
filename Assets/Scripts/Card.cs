@@ -445,6 +445,7 @@ public class Card : HoldCardObject,
             AnimationQueue.Instance.AddOnceRunMethodToLastIndex(() =>
             {
                 m_combinedSign.gameObject.SetActive(true);
+                m_combinedSign.GetComponent<Animator>().Play("Base Layer.CombinedAnimation", 0, Time.time % 1.00f); //animationの時間で割った余り　タイミングを合わせてる
             });
         }
 
@@ -462,6 +463,7 @@ public class Card : HoldCardObject,
             AnimationQueue.Instance.AddOnceRunMethodToLastIndex(() =>
             {
                 m_compressedSign.gameObject.SetActive(true);
+                m_compressedSign.GetComponent<Animator>().Play("Base Layer.CompressedAnimation", 0, Time.time % 1.00f); //animationの時間で割った余り
             });
         }
 

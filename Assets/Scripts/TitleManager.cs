@@ -11,12 +11,17 @@ public class TitleManager : MonoBehaviour
 
     private void Awake()
     {
+    }
+
+    void Start()
+    {
         m_RuleButton = m_RuleButtonObj.GetComponent<Button>();
         m_TutorialButton = m_TutorialButtonObj.GetComponent<Button>();
         m_SingleplayButton = m_SingleplayButtonObj.GetComponent<Button>();
         m_MultiplayButton = m_MultiplayButtonObj.GetComponent<Button>();
 
         m_MultiplayButton.Enable();
+        m_MultiplayButton.RegistPressedBehave(PushMultiplayButton);
     }
 
     public void PushMultiplayButton()

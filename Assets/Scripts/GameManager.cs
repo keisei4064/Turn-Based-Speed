@@ -114,6 +114,11 @@ public class GameManager : MonoBehaviourPunCallbacks
         //AnimationQueue.Instance.DoAnimation();
     }
 
+    private void OnGUI()
+    {
+        GUILayout.Label(PhotonNetwork.NetworkClientState.ToString());
+    }
+
 
     // 内部クラスとしてStateパターンを実装 ------------------------------------------------------------------------------------------------------------------------------
     abstract class GameManagerState
@@ -155,7 +160,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                         MakeInitialHands,
                         MakeInitialTrash,
 
-                        // TODO: どっちから始めるか
+                        // TODO: ?????????n???
                         m_gameStatus.SetTurnRandom,
 
                         WorkQueue.Instance.RestartRPC
@@ -200,7 +205,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
             for (Card.Suit s = Card.Suit.Club; s <= Card.Suit.Spade; s++)
             {
-                for (int i = 1; i <= 4; i++)
+                for (int i = 1; i <= 13; i++)
                 {
                     //Image newCardImageObj = Image.Instantiate(m_ImageCardPrefab);
                     Image newCardImageObj = PhotonNetwork.Instantiate("ImageCard", Vector3.zero, Quaternion.identity).GetComponent<Image>();
@@ -543,9 +548,9 @@ public class GameManager : MonoBehaviourPunCallbacks
             Card.EnqueueHappenHandlingObserver(() =>
             {
                 if (topCard.GetParentHoldCardObject() == m_handlingHand) //手札にドローしたとき
-            {
-                // INITIAL_CARDS_NUMの枚数まで自動で引く
-                int drawNum = Hand.INITIAL_CARDS_NUM - m_handlingHand.m_cards.Count;
+                {
+                    // INITIAL_CARDS_NUM????????????????
+                    int drawNum = Hand.INITIAL_CARDS_NUM - m_handlingHand.m_cards.Count;
                     if (drawNum > m_handlingDeck.m_cards.Count) drawNum = m_handlingDeck.m_cards.Count;
                     if (drawNum > 0)
                     {
@@ -698,9 +703,9 @@ public class GameManager : MonoBehaviourPunCallbacks
             Card.EnqueueHappenHandlingObserver(() =>
             {
                 m_handlingHand.SetAllWaitCardModeToSingle();
-            //Debug.Log("GetSingleCardNum(): " + m_handlingHand.GetCanCombineOrCompressCardNum());
+                //Debug.Log("GetSingleCardNum(): " + m_handlingHand.GetCanCombineOrCompressCardNum());
 
-            if (m_handlingHand.GetCanCombineOrCompressCardNum() >= 2)
+                if (m_handlingHand.GetCanCombineOrCompressCardNum() >= 2)
                 {
                     WorkQueue.Instance.EnqueueOnceRunFunc(CombinePhase);
                 }

@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.SceneManagement;
 
 public class LobbyScene : MonoBehaviourPunCallbacks
 {
     private const int MaxPlayerPerRoom = 2;
+    public GameObject BackButtonObj;
 
     private void Awake()
     {
@@ -17,7 +19,9 @@ public class LobbyScene : MonoBehaviourPunCallbacks
     void Start()
     {
         PhotonNetwork.NickName = "Player";
-        PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.ConnectUsingSettings(); // Photonサーバに接続
+        BackButtonObj.GetComponent<Button>().Enable();
+        BackButtonObj.GetComponent<Button>().RegistPressedBehave(OnPushedBackButton);
     }
 
     public override void OnConnectedToMaster()
@@ -42,5 +46,17 @@ public class LobbyScene : MonoBehaviourPunCallbacks
     private void LoadGameScene()
     {
         PhotonNetwork.LoadLevel("GameScene");
+    }
+
+
+    public void OnPushedBackButton()
+    {
+        PhotonNetwork.Disconnect(); // Photonサーバから切断
+        SceneManager.LoadScene("TitleScene");
+    }
+
+    private void OnGUI()
+    {
+        GUILayout.Label(PhotonNetwork.NetworkClientState.ToString());
     }
 }
