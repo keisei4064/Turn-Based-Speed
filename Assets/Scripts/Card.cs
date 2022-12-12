@@ -52,6 +52,8 @@ public class Card : HoldCardObject,
     public bool m_isDragging { get; private set; } = false;
     public bool m_canDrag { get; private set; }
 
+    static Vector3 m_constantLocalScale = new Vector3(40, 40, 1);
+
     private void Awake()
     {
         DisableReceiveDrop();
@@ -85,6 +87,7 @@ public class Card : HoldCardObject,
         Color originColor = m_attachedObject.color;
         virtualCard.m_attachedObject.color = new Color(originColor.r, originColor.g, originColor.b, 0.5f);
         m_virtualCards.Add(virtualCard);
+        virtualCard.transform.localScale = m_constantLocalScale;
         foreach (Card subCard in m_cards)
         {
             Card virtualSubCard = Instantiate(subCard, GameManager.Instance.m_TopLayerCanvas.transform);
@@ -122,8 +125,11 @@ public class Card : HoldCardObject,
             }
         }
         hits = Physics2D.RaycastAll(targetPos, new Vector3(0, 0, 1));
+
+        Debug.Log(hits);
         foreach (var hit in hits)
         {
+            Debug.Log("hited object: " + hit.collider.gameObject.name);
             HoldCardObject cardDroppedFuncs = hit.collider.gameObject.GetComponent<HoldCardObject>();
             if (cardDroppedFuncs != null)
                 cardDroppedFuncs.CardHover();
@@ -552,7 +558,7 @@ public class Card : HoldCardObject,
     private void SetTransformPositionToParentRPC()
     {
         this.transform.position = this.transform.parent.position;
-        transform.localScale = new Vector3(1, 1, 1);
+        transform.localScale = m_constantLocalScale;
 
         // 大きさが適切に設定された時点で表示を有効にする
         GetComponent<Image>().enabled = true;

@@ -8,7 +8,7 @@ public class Hand : HoldCardObject
 {
     public const int MAX_CARDS_NUM = 6;
     public const int INITIAL_CARDS_NUM = 4;
-    public const float SPACE_BETWEEN_CARDS = 2.5f;
+    public const float SPACE_BETWEEN_CARDS = 100f;
 
     const int frameToSpend = 20;
     public bool m_isFront { get; private set; }
@@ -70,8 +70,8 @@ public class Hand : HoldCardObject
             AnimationQueue.Instance.AddAnimToLastIndex(animRetVal);
         }
     }
-        
-    // AddCardを行った後
+
+    // AddCard???s??????
     public void DoAddCardAnim()
     {
         //移動
@@ -90,7 +90,7 @@ public class Hand : HoldCardObject
         List<Vector3> poses = new List<Vector3>();
 
         float cardxPos = 0;
-        switch(m_cards.Count % 2)
+        switch (m_cards.Count % 2)
         {
             case 0: //偶数
                 cardxPos = -1 * (-SPACE_BETWEEN_CARDS / 2 + SPACE_BETWEEN_CARDS * m_cards.Count / 2);
@@ -100,7 +100,7 @@ public class Hand : HoldCardObject
                 break;
         }
 
-        for(int i = 0; i < m_cards.Count; i++)
+        for (int i = 0; i < m_cards.Count; i++)
         {
             poses.Add(transform.TransformPoint(new Vector3(cardxPos, 0, 0)));
             cardxPos += SPACE_BETWEEN_CARDS;
@@ -126,7 +126,7 @@ public class Hand : HoldCardObject
     public int GetCanCombineOrCompressCardNum() // ジョーカーも除く
     {
         int count = 0;
-        foreach(Card card in m_cards)
+        foreach (Card card in m_cards)
         {
             if (card.m_mode == Card.MODE.SINGLE && card.m_suit != Card.Suit.Joker) count++;
         }
@@ -135,7 +135,7 @@ public class Hand : HoldCardObject
 
     public void SetAllSingleCardsMode(Card.MODE mode)
     {
-        foreach(Card card in m_cards)
+        foreach (Card card in m_cards)
         {
             if (card.m_mode == Card.MODE.SINGLE)
                 card.SetMode(mode);
@@ -143,7 +143,7 @@ public class Hand : HoldCardObject
     }
     public void SetAllWaitCardModeToSingle()
     {
-        foreach(Card card in m_cards)
+        foreach (Card card in m_cards)
         {
             if (card.m_mode == Card.MODE.WAIT_COMBINE || card.m_mode == Card.MODE.WAIT_COMPRESS)
                 card.SetMode(Card.MODE.SINGLE);

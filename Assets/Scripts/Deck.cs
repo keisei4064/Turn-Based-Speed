@@ -35,6 +35,7 @@ public class Deck : HoldCardObject
     {
         if (doSync)
         {
+            Debug.Assert(photonView);
             photonView.RPC(nameof(AddCardRPC), RpcTarget.AllBuffered, card, doAnim);
         }
         else
