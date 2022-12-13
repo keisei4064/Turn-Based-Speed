@@ -53,6 +53,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     GameManagerState m_nowState;
     static GameManagerState m_nextState;
 
+    List<MouseHoverBehave> lastHits = new List<MouseHoverBehave>(); //Hover挙動
+
     private void Awake()
     {
         // TODO: 確認不十分　いちいち書くのめんどい
@@ -101,6 +103,27 @@ public class GameManager : MonoBehaviourPunCallbacks
             m_nowState = m_nextState;
             m_nowState.Enter();
             m_nextState = null;
+        }
+
+        // マウスのHover処理
+        if (lastHits.Count != 0) //前回の分 離れたこととする
+        {
+            foreach (var hit in lastHits)
+            {
+                hit.OnMouseNotHover();
+            }
+        }
+        lastHits.Clear();
+
+        Vector2 targetPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        foreach (var hit in Physics2D.RaycastAll(targetPos, Vector2.zero))
+        {
+            MouseHoverBehave hoverBehaveComponent;
+            if (hit.collider.TryGetComponent<MouseHoverBehave>(out hoverBehaveComponent))
+            {
+                hoverBehaveComponent.OnMouseHover();
+                lastHits.Add(hoverBehaveComponent);
+            }
         }
     }
 

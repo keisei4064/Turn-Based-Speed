@@ -12,7 +12,7 @@ public class AnimationQueue : MonoBehaviourPunCallbacks
     {
         get
         {
-            if(instance == null)
+            if (instance == null)
             {
                 instance = (AnimationQueue)FindObjectOfType(typeof(AnimationQueue));
                 if (null == instance)
@@ -23,10 +23,8 @@ public class AnimationQueue : MonoBehaviourPunCallbacks
             return instance;
         }
     }
-    private AnimationQueue()
-    {
-        m_animMethods = new List<List<MethodAndWaitFrames>>();
-    }
+
+    // ------------------------------------------------------------------------------------------------
 
     // アニメーションを行うメソッドの戻り値(IEnumerator<bool>)と待ちフレーム数をセットで保持する
     public class MethodAndWaitFrames
@@ -42,12 +40,19 @@ public class AnimationQueue : MonoBehaviourPunCallbacks
         }
     }
 
-    List<List<MethodAndWaitFrames>> m_animMethods;
+    List<List<MethodAndWaitFrames>> m_animMethods = new List<List<MethodAndWaitFrames>>();
 
+    static public bool IsPlayingAnimation
+    {
+        get
+        {
+            return instance.m_animMethods.Count != 0;
+        }
+    }
 
     public void DoAnimation()
     {
-        if (m_animMethods.Count == 0) return;
+        if (!IsPlayingAnimation) return;
 
         for (int i = 0; i < m_animMethods[0].Count; i++)
         {
@@ -89,14 +94,14 @@ public class AnimationQueue : MonoBehaviourPunCallbacks
         //Debug.Log("AddAnimToLastIndex");
         MethodAndWaitFrames additionalMethod = new MethodAndWaitFrames(retValOfAnimMethod, waitFrames);
 
-        if(m_animMethods.Count == 0)
+        if (m_animMethods.Count == 0)
         {
             CreateNewEmptyAnimListToEnd();
         }
 
         m_animMethods[m_animMethods.Count - 1].Add(additionalMethod);
 
-        if(m_animMethods[m_animMethods.Count - 1].Count > 100)
+        if (m_animMethods[m_animMethods.Count - 1].Count > 100)
         {
             Debug.LogError("Last index count of animationQueue is more than 100.");
         }

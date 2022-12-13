@@ -8,7 +8,6 @@ using Photon.Pun;
 
 public class Deck : HoldCardObject
 {
-    public bool m_canDrop;
     public bool m_isFront;
 
     private void Awake()
@@ -163,6 +162,11 @@ public class Deck : HoldCardObject
                 yield return false;
             }
 
+            // RPCópè„èëÇ´
+            animCard1.transform.SetParent(topLayer);
+            animCard2.transform.SetParent(topLayer);
+            animCard3.transform.SetParent(topLayer);
+
             // ï\é¶Ç…Ç®ÇØÇÈè„â∫ä÷åWÇÃê›íË
             animCard1.transform.SetAsLastSibling();
             animCard3.transform.SetAsLastSibling();
@@ -181,10 +185,10 @@ public class Deck : HoldCardObject
         }
         //Debug.Log("Anim_Shuffle end");
 
-        Transform originLayer = this.transform.Find("Canvas");
-        animCard1.transform.SetParent(originLayer);
-        animCard2.transform.SetParent(originLayer);
-        animCard3.transform.SetParent(originLayer);
+        // Transform originLayer = this.transform.Find("Canvas");
+        animCard1.transform.SetParent(animCard1.m_parentTransform);
+        animCard2.transform.SetParent(animCard2.m_parentTransform);
+        animCard3.transform.SetParent(animCard3.m_parentTransform);
 
         SetViewOrder();
         yield return true;

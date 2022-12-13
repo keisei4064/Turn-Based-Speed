@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 using System;
 using ExitGames.Client.Photon;
@@ -24,12 +25,13 @@ public class Card : HoldCardObject,
     public int m_num;
     public bool m_isFront; //処理における表裏
     public bool m_isImageFront; // 表示における表裏
-    public Image m_attachedObject;
+    public Image m_imageComponent;
     public GameObject m_canDragSign;
     public GameObject m_combinedSign;
     public GameObject m_compressedSign;
-
-    public Transform m_parent_canvas_transform;
+    [SerializeField]
+    private GameObject m_numberViewer;
+    public Transform m_parentTransform { get; set; }
 
     static Sprite[] m_sprites;
 
@@ -46,7 +48,7 @@ public class Card : HoldCardObject,
         WAIT_COMPRESS,
         CONTAINED
     }
-    public MODE m_mode { get; private set; }
+    public MODE m_mode;
 
     //flags
     public bool m_isDragging { get; private set; } = false;
@@ -62,6 +64,7 @@ public class Card : HoldCardObject,
         if (m_happenHandlingObserverQueue == null)
             m_happenHandlingObserverQueue = new Queue<Action>();
         m_canDragSign.SetActive(false);
+        m_numberViewer.SetActive(false);
 
         m_cards = new List<Card>();
         m_mode = MODE.SINGLE;
@@ -84,15 +87,15 @@ public class Card : HoldCardObject,
         if (!m_canDrag) return;
         //半透明のカードを複製
         Card virtualCard = Instantiate(this, GameManager.Instance.m_TopLayerCanvas.transform);
-        Color originColor = m_attachedObject.color;
-        virtualCard.m_attachedObject.color = new Color(originColor.r, originColor.g, originColor.b, 0.5f);
+        Color originColor = m_imageComponent.color;
+        virtualCard.m_imageComponent.color = new Color(originColor.r, originColor.g, originColor.b, 0.5f);
         m_virtualCards.Add(virtualCard);
         virtualCard.transform.localScale = m_constantLocalScale;
         foreach (Card subCard in m_cards)
         {
             Card virtualSubCard = Instantiate(subCard, GameManager.Instance.m_TopLayerCanvas.transform);
-            Color subOriginColor = m_attachedObject.color;
-            virtualSubCard.m_attachedObject.color = new Color(subOriginColor.r, subOriginColor.g, subOriginColor.b, 0.5f);
+            Color subOriginColor = m_imageComponent.color;
+            virtualSubCard.m_imageComponent.color = new Color(subOriginColor.r, subOriginColor.g, subOriginColor.b, 0.5f);
             m_virtualCards.Add(virtualSubCard);
         }
 
@@ -107,15 +110,14 @@ public class Card : HoldCardObject,
     {
         if (!m_canDrag) return;
         //Debug.Log("OnDrag");
-        Vector3 targetPos = Camera.main.ScreenToWorldPoint(eventData.position);
-        targetPos.z = 0;
+        Vector2 targetPos = Camera.main.ScreenToWorldPoint(eventData.position);
         foreach (Card c in m_virtualCards)
         {
             c.transform.position = targetPos;
         }
         m_isDragging = true;
 
-        if (hits != null)
+        if (hits != null) //前回の分
         {
             foreach (var hit in hits)
             {
@@ -124,17 +126,18 @@ public class Card : HoldCardObject,
                     cardDroppedFuncs.CardNotHover();
             }
         }
-        hits = Physics2D.RaycastAll(targetPos, new Vector3(0, 0, 1));
 
-        Debug.Log(hits);
+        hits = Physics2D.RaycastAll(targetPos, Vector2.zero);
         foreach (var hit in hits)
         {
-            Debug.Log("hited object: " + hit.collider.gameObject.name);
+            // Debug.Log("hited object: " + hit.collider.gameObject.name);
             HoldCardObject cardDroppedFuncs = hit.collider.gameObject.GetComponent<HoldCardObject>();
             if (cardDroppedFuncs != null)
                 cardDroppedFuncs.CardHover();
         }
     }
+
+    // ドラッグが終わったとき＝ドロップされたとき
     public void OnEndDrag(PointerEventData eventData)
     {
         if (!m_canDrag) return;
@@ -147,27 +150,39 @@ public class Card : HoldCardObject,
         m_virtualCards.Clear();
         m_isDragging = false;
 
-        // ドラップされたオブジェクトを検出
+        // ドロップされたオブジェクトを検出
         Vector3 targetPos = Camera.main.ScreenToWorldPoint(eventData.position);
         hits = Physics2D.RaycastAll(targetPos, new Vector3(0, 0, 1));
-
-        foreach (var aciton in m_endDragObserverList) //endDragObserverを実行
-        {
-            aciton();
-        }
+        bool isHandlingHappened = false;
         foreach (var hit in hits)
         {
             HoldCardObject cardDroppedFuncs = hit.collider.gameObject.GetComponent<HoldCardObject>();
             if (cardDroppedFuncs != null)
             {
-                cardDroppedFuncs.CardDrop(this);
-
-                //happenHandlingObserverを実行
-                int count = m_happenHandlingObserverQueue.Count;
-                for (int i = 0; i < count; i++)
+                if (!cardDroppedFuncs.m_canDrop)
                 {
-                    m_happenHandlingObserverQueue.Dequeue()();
+                    Debug.Log("can't drop");
+                    continue; // Dropを受け付けない場合は無視
                 }
+
+                cardDroppedFuncs.CardDrop(this);
+                isHandlingHappened = true; // 操作が発生した
+            }
+        }
+
+        //endDragObserverを実行
+        foreach (var aciton in m_endDragObserverList)
+        {
+            aciton();
+        }
+
+        //happenHandlingObserverを実行
+        if (isHandlingHappened)
+        {
+            int count = m_happenHandlingObserverQueue.Count;
+            for (int i = 0; i < count; i++)
+            {
+                m_happenHandlingObserverQueue.Dequeue()();
             }
         }
     }
@@ -194,7 +209,6 @@ public class Card : HoldCardObject,
         m_happenHandlingObserverQueue.Clear();
     }
 
-
     public void Initialize(Suit suitVal, int numVal, bool isFront = false)
     {
         photonView.RPC(nameof(InitializeRPC), RpcTarget.AllBuffered, suitVal, numVal, isFront);
@@ -203,13 +217,13 @@ public class Card : HoldCardObject,
     [PunRPC]
     private void InitializeRPC(Suit suitVal, int numVal, bool isFront)
     {
-        m_attachedObject = this.gameObject.GetComponent<Image>();
+        m_imageComponent = this.gameObject.GetComponent<Image>();
         m_suit = suitVal;
         m_num = numVal;
         m_isFront = isFront;
         m_isImageFront = isFront;
         LoadImages();
-        m_attachedObject.sprite = GetImage();
+        m_imageComponent.sprite = GetImage();
 
         m_sync_id = m_id_count;
         m_id_count++;
@@ -290,7 +304,7 @@ public class Card : HoldCardObject,
 
         // Imageを裏返す
         m_isImageFront = !m_isImageFront;
-        m_attachedObject.sprite = GetImage();
+        m_imageComponent.sprite = GetImage();
 
         rotateAnglePerFrame = 90 / (float)AfterTurnOverframe;
         for (int i = 0; i < AfterTurnOverframe; i++)
@@ -312,6 +326,7 @@ public class Card : HoldCardObject,
         this.transform.SetParent(GameManager.Instance.m_TopLayerCanvas.transform);
         foreach (Card card in m_cards)
         {
+            Debug.Assert(card.transform.parent == this.transform);
             card.transform.SetParent(GameManager.Instance.m_TopLayerCanvas.transform);
         }
 
@@ -337,12 +352,16 @@ public class Card : HoldCardObject,
             }
         }
 
-        this.transform.SetParent(m_parent_canvas_transform);
+        this.transform.SetParent(this.m_parentTransform);
         foreach (Card card in m_cards)
         {
-            card.transform.SetParent(m_parent_canvas_transform);
+            card.transform.SetParent(card.m_parentTransform);
         }
         //Debug.Log("Anim_StraightLineMove end");
+
+        // 描写順　調整
+        m_numberViewer.transform.SetAsLastSibling();
+        m_combinedSign.transform.SetAsLastSibling();
         yield return true;
     }
 
@@ -398,18 +417,6 @@ public class Card : HoldCardObject,
         m_isFront = !m_isFront;
     }
 
-    //public void TurnIntoFront()
-    //{
-    //    m_isFront = true;
-    //    m_attachedObject.sprite = GetImage();
-    //}
-
-    //public void TurnIntoBack()
-    //{
-    //    m_isFront = false;
-    //    m_attachedObject.sprite = GetImage();
-    //}
-
     // AddCardRPCのラッパ関数
     override public void AddCard(Card card, bool doAnim = true, bool doSync = true)
     {
@@ -433,7 +440,8 @@ public class Card : HoldCardObject,
 
 
         m_cards.Add(card);
-        card.transform.SetAsLastSibling(); // 描写を一番最後に設定
+        card.SetParentTransform(this.transform);
+        // card.transform.SetAsLastSibling(); // 描写を一番最後に設定
 
         //Combine
         if (m_mode == MODE.WAIT_COMBINE)
@@ -452,6 +460,10 @@ public class Card : HoldCardObject,
             {
                 m_combinedSign.gameObject.SetActive(true);
                 m_combinedSign.GetComponent<Animator>().Play("Base Layer.CombinedAnimation", 0, Time.time % 1.00f); //animationの時間で割った余り　タイミングを合わせてる
+
+                // m_numberViewer.SetActive(true);
+                m_numberViewer.GetComponentInChildren<TextMeshProUGUI>().text = m_num.ToString();
+                card.GetComponent<BoxCollider2D>().enabled = false; // マウス関係のコールバックを受け取らなくする
             });
         }
 
@@ -561,13 +573,13 @@ public class Card : HoldCardObject,
         transform.localScale = m_constantLocalScale;
 
         // 大きさが適切に設定された時点で表示を有効にする
-        GetComponent<Image>().enabled = true;
+        m_imageComponent.enabled = true;
     }
 
-    public void SetParentCanvas(Transform canvas)
+    public void SetParentTransform(Transform parent)
     {
-        this.transform.SetParent(canvas);
-        this.m_parent_canvas_transform = canvas;
+        this.transform.SetParent(parent);
+        this.m_parentTransform = parent;
     }
 
     //PUNで通信できるようシリアライズ化
@@ -616,5 +628,22 @@ public class Card : HoldCardObject,
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
         // インスタンス化された時の処理
+    }
+
+    public void ShowNumber()
+    {
+        if (AnimationQueue.IsPlayingAnimation) return;
+        if (m_mode == MODE.COMBINED)
+        {
+            m_numberViewer.SetActive(true);
+        }
+    }
+
+    public void HideNumber()
+    {
+        if (m_mode == MODE.COMBINED)
+        {
+            m_numberViewer.SetActive(false);
+        }
     }
 }

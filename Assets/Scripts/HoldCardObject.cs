@@ -12,6 +12,9 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
     public GameObject m_dropRange;
     public GameObject m_canDropSign;
 
+    [SerializeField]
+    public bool m_canDrop;
+
     // AddCardRPCのラッパ関数
     virtual public void AddCard(Card card, bool doAnim, bool doSync)
     {
@@ -30,7 +33,7 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
     {
         Debug.Assert(card != null);
 
-        Transform canvas = card.m_parent_canvas_transform; // Canvas <- Card
+        Transform canvas = card.m_parentTransform; // Canvas <- Card
         if (canvas != null)
         {
             Transform parent = canvas.parent; // HoldCardObject <- Canvas
@@ -39,18 +42,18 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
             parent.GetComponent<HoldCardObject>().RemoveCard(card, true);
         }
 
-        card.SetParentCanvas(this.transform.Find("Canvas").transform);  // Cardの親をこのオブジェクトに設定
+        card.SetParentTransform(this.transform.Find("Canvas").transform);  // Cardの親をこのオブジェクトに設定
         m_cards.Add(card);
         card.transform.SetAsLastSibling(); // 描写を一番最後に設定
 
-        if (card.m_mode == Card.MODE.COMBINED || card.m_mode == Card.MODE.COMPRESSED)
-        {
-            foreach (Card containedCard in card.m_cards)
-            {
-                containedCard.SetParentCanvas(this.transform.Find("Canvas").transform); // Cardの親をこのオブジェクトに設定
-                containedCard.transform.SetAsLastSibling(); // 描写を一番最後に設定
-            }
-        }
+        // if (card.m_mode == Card.MODE.COMBINED || card.m_mode == Card.MODE.COMPRESSED)
+        // {
+        //     foreach (Card containedCard in card.m_cards)
+        //     {
+        //         containedCard.SetParentCanvas(this.transform.Find("Canvas").transform); // Cardの親をこのオブジェクトに設定
+        //         containedCard.transform.SetAsLastSibling(); // 描写を一番最後に設定
+        //     }
+        // }
         m_dropRange.transform.SetAsLastSibling();
         m_canDropSign.transform.SetAsLastSibling();
     }
@@ -65,16 +68,19 @@ public abstract class HoldCardObject : MonoBehaviourPunCallbacks
     public void EnableReceiveDrop()
     {
         m_canDropSign.SetActive(true);
-        GetComponent<BoxCollider2D>().enabled = true;
+        // GetComponent<BoxCollider2D>().enabled = true;
+        m_canDrop = true;
     }
     public void DisableReceiveDrop()
     {
         m_canDropSign.SetActive(false);
-        GetComponent<BoxCollider2D>().enabled = false;
+        // GetComponent<BoxCollider2D>().enabled = false;
+        m_canDrop = false;
     }
     virtual public void CardHover()
     {
-        m_dropRange.GetComponent<Image>().enabled = true;
+        if (m_canDrop)
+            m_dropRange.GetComponent<Image>().enabled = true;
     }
     virtual public void CardNotHover()
     {
