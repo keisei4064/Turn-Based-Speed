@@ -37,7 +37,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5124146040872441922, guid: dd1454fd5befa11428c606f4d4933fe4, type: 3}
       propertyPath: m_fontSize
-      value: 19.15
+      value: 52.45
       objectReference: {fileID: 0}
     - target: {fileID: 5124146040872441922, guid: dd1454fd5befa11428c606f4d4933fe4, type: 3}
       propertyPath: m_fontSizeBase
@@ -197,7 +197,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8478122193911562339, guid: dd1454fd5befa11428c606f4d4933fe4, type: 3}
       propertyPath: m_Name
-      value: BackButton Variant
+      value: BackButton
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dd1454fd5befa11428c606f4d4933fe4, type: 3}

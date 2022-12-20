@@ -12,11 +12,16 @@ public class UIManager : MonoBehaviour
     public GameObject CombineButtonObj;
     public GameObject CompressButtonObj;
     public GameObject TurnEndButtonObj;
+    public GameObject BackButtonObj;
+
     public Button DrawButton;
     public Button DiscardButton;
     public Button CombineButton;
     public Button CompressButton;
     public Button TurnEndButton;
+    public Button BackButton;
+
+    public Text DrawButtonText;
 
     public GameObject TransitionObj;
     Animator transitionAnimator;
@@ -32,6 +37,7 @@ public class UIManager : MonoBehaviour
         CombineButton = CombineButtonObj.GetComponent<Button>();
         CompressButton = CompressButtonObj.GetComponent<Button>();
         TurnEndButton = TurnEndButtonObj.GetComponent<Button>();
+        BackButton = BackButtonObj.GetComponent<Button>();
 
         transitionAnimator = TransitionObj.GetComponent<Animator>();
     }
@@ -51,16 +57,16 @@ public class UIManager : MonoBehaviour
     {
         m_myOrOppoTurn.enabled = GameManager.m_gameStatus.m_nowMode == GameStatus.Mode.PLAYING;
 
-        if (GameManager.m_gameStatus.IsMyTurn())
-        {
-            m_myOrOppoTurn.text = "Your Turn";
-        }
-        else
-        {
-            m_myOrOppoTurn.text = "Opponent's Turn";
-        }
+        // if (GameManager.m_gameStatus.IsMyTurn())
+        // {
+        //     m_myOrOppoTurn.text = "Your Turn";
+        // }
+        // else
+        // {
+        //     m_myOrOppoTurn.text = "Opponent's Turn";
+        // }
     }
-    
+
     public IEnumerator<bool> Anim_Transition(string message)
     {
         TransitionObj.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = message;
@@ -69,7 +75,8 @@ public class UIManager : MonoBehaviour
         int loss = 0;
 
         //Debug.Log("normlizedTime" + transitionAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime);
-        while(!transitionAnimator.GetCurrentAnimatorStateInfo(0).IsName("TransitionAnimation")){
+        while (!transitionAnimator.GetCurrentAnimatorStateInfo(0).IsName("TransitionAnimation"))
+        {
             loss++;
             yield return false;
         }
@@ -88,7 +95,7 @@ public class UIManager : MonoBehaviour
     public void ShowResult(bool isPlayerWinner)
     {
         ResultObj.SetActive(true);
-        if(isPlayerWinner)
+        if (isPlayerWinner)
         {
             ResultObj.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = "You Win";
             ResultObj.transform.Find("RedLine").gameObject.SetActive(true);
@@ -99,6 +106,18 @@ public class UIManager : MonoBehaviour
             ResultObj.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = "You Lose";
             ResultObj.transform.Find("RedLine").gameObject.SetActive(false);
             ResultObj.transform.Find("BlueLine").gameObject.SetActive(true);
+        }
+    }
+
+    public void UpdateTurnView()
+    {
+        if (GameManager.m_gameStatus.IsMyTurn())
+        {
+            m_myOrOppoTurn.text = "Your Turn";
+        }
+        else
+        {
+            m_myOrOppoTurn.text = "Opponent's Turn";
         }
     }
 }

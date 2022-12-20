@@ -32,10 +32,10 @@ public class Button : MonoBehaviour
     {
         m_ButtonPressedBehave = action;
     }
-    public void ClearPressedBehave()
-    {
-        m_ButtonPressedBehave = null;
-    }
+    // public void ClearPressedBehave()
+    // {
+    //     m_ButtonPressedBehave = null;
+    // }
     public void Pressed()
     {
         if (m_isEnabled == false) return;

@@ -406,6 +406,13 @@ public class GameManager : MonoBehaviourPunCallbacks
             m_drawedToTrushLastTurn = false;
             m_drawedToTrushLastMyTurn = false;
             m_drawedToTrushLastOppoTurn = false;
+
+            m_UIManager.DrawButton.RegistPressedBehave(OnPushedDrawButton);
+            m_UIManager.DiscardButton.RegistPressedBehave(OnPushedDiscardButton);
+            m_UIManager.CombineButton.RegistPressedBehave(OnPushedCombineButton);
+            m_UIManager.CompressButton.RegistPressedBehave(OnPushedCompressButton);
+            m_UIManager.TurnEndButton.RegistPressedBehave(OnPushedTurnEndButton);
+            m_UIManager.BackButton.RegistPressedBehave(OnPushedBackButton);
         }
         public override void Update()
         {
@@ -422,6 +429,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         void StartTurn()
         {
             Debug.Log("Start Turn");
+            m_UIManager.UpdateTurnView();
             AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
             if (m_gameStatus.IsMyTurn())
             {
@@ -450,92 +458,11 @@ public class GameManager : MonoBehaviourPunCallbacks
                 Debug.Log("not my turn");
 
                 WorkQueue.Instance.EnqueueLoopFunc(WaitMyTurn);
+
                 return;
             }
 
-            AnimationQueue.Instance.CreateNewEmptyAnimListToEnd();
-
-            Action commonPressedBehave = () =>
-            {
-                WorkQueue.Instance.Restart();
-
-                m_UIManager.DrawButton.ClearPressedBehave();
-                m_UIManager.DiscardButton.ClearPressedBehave();
-                m_UIManager.CombineButton.ClearPressedBehave();
-                m_UIManager.CompressButton.ClearPressedBehave();
-                m_UIManager.TurnEndButton.ClearPressedBehave();
-                m_UIManager.DrawButton.Disable();
-                m_UIManager.DiscardButton.Disable();
-                m_UIManager.CombineButton.Disable();
-                m_UIManager.CompressButton.Disable();
-                m_UIManager.TurnEndButton.Disable();
-            };
-
-            m_UIManager.DrawButton.Disable();
-            m_UIManager.DiscardButton.Disable();
-            m_UIManager.CombineButton.Disable();
-            m_UIManager.CompressButton.Disable();
-
-
-            // DrawButton
-            if (m_handlingDeck.m_cards.Count != 0 && !(m_drawedToTrushLastTurn && !m_handlingHand.CanAddCard()))
-            {
-                m_UIManager.DrawButton.Enable();
-                m_UIManager.DrawButton.RegistPressedBehave(() =>
-                {
-                    commonPressedBehave();
-                    WorkQueue.Instance.EnqueueOnceRunFunc(DrawFromDeck);
-                });
-            }
-
-            // DiscardButton
-            bool canDiscard = false;
-            foreach (var card in m_handlingHand.m_cards)
-            {
-                if (card.IsContinuous(m_LeftTrush.GetTopCard())) canDiscard = true;
-                if (card.IsContinuous(m_RightTrush.GetTopCard())) canDiscard = true;
-            }
-            if (m_handlingDeck.m_cards.Count == 0) canDiscard = true;
-            if (canDiscard)
-            {
-                m_UIManager.DiscardButton.Enable();
-                m_UIManager.DiscardButton.RegistPressedBehave(() =>
-                {
-                    commonPressedBehave();
-                    isFirstDiscard = true;
-                    WorkQueue.Instance.EnqueueOnceRunFunc(DiscardPhase);
-                });
-            }
-
-            // CombineButton
-            if (m_handlingHand.GetCanCombineOrCompressCardNum() >= 2)
-            {
-                m_UIManager.CombineButton.Enable();
-                m_UIManager.CombineButton.RegistPressedBehave(() =>
-                {
-                    commonPressedBehave();
-                    WorkQueue.Instance.EnqueueOnceRunFunc(CombinePhase);
-                });
-            }
-
-            // CompressButton
-            if (CanCompress())
-            {
-                m_UIManager.CompressButton.Enable();
-                m_UIManager.CompressButton.RegistPressedBehave(() =>
-                {
-                    commonPressedBehave();
-                    WorkQueue.Instance.EnqueueOnceRunFunc(CompressPhase);
-                });
-            }
-
-            // TurnEndButton
-            m_UIManager.TurnEndButton.Enable();
-            m_UIManager.TurnEndButton.RegistPressedBehave(() =>
-            {
-                commonPressedBehave();
-                WorkQueue.Instance.EnqueueOnceRunFunc(TurnEnd);
-            });
+            SetButtoninteraction();
         }
 
         void DrawFromDeck()
@@ -566,13 +493,13 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             WorkQueue.Instance.Stop();
             Card.EnqueueHappenHandlingObserver(WorkQueue.Instance.Restart);
-
+            Card.EnqueueHappenHandlingObserver(TurnEnd);
+            Card.EnqueueHappenHandlingObserver(m_UIManager.BackButton.Disable);
 
             Card.EnqueueHappenHandlingObserver(() =>
             {
                 if (topCard.GetParentHoldCardObject() == m_handlingHand) //手札にドローしたとき
                 {
-                    // INITIAL_CARDS_NUM????????????????
                     int drawNum = Hand.INITIAL_CARDS_NUM - m_handlingHand.m_cards.Count;
                     if (drawNum > m_handlingDeck.m_cards.Count) drawNum = m_handlingDeck.m_cards.Count;
                     if (drawNum > 0)
@@ -597,7 +524,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 }
             });
 
-            WorkQueue.Instance.EnqueueOnceRunFunc(TurnEnd);
+            // WorkQueue.Instance.EnqueueOnceRunFunc(TurnEnd);
         }
 
         bool isFirstDiscard;
@@ -649,7 +576,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 SetContinuousRelation(isFirstDiscard);
             }
 
-            isFirstDiscard = false;
+            // isFirstDiscard = false;
 
             bool canDiscard = false;
             foreach (var card in m_handlingHand.m_cards)
@@ -661,27 +588,19 @@ public class GameManager : MonoBehaviourPunCallbacks
             {
                 Card.EnqueueHappenHandlingObserver(() =>
                 {
+                    isFirstDiscard = false;
                     WorkQueue.Instance.EnqueueOnceRunFunc(DiscardPhase);
+                    m_UIManager.BackButton.Disable();
                 });
 
-                // TurnEndButtonを押された時の挙動
                 m_UIManager.TurnEndButton.Enable();
-                m_UIManager.TurnEndButton.RegistPressedBehave(() =>
-                {
-                    WorkQueue.Instance.EnqueueOnceRunFunc(TurnEnd);
-                    foreach (var card in m_handlingHand.m_cards)
-                    {
-                        card.DisableDrag();
-                        card.ClearDragObserverList();
-                        Card.ClearHappenHandlingObserver();
-                    }
-                });
             }
             else
             {
                 // 強制ターンエンド
                 WorkQueue.Instance.EnqueueOnceRunFunc(TurnEnd);
             }
+
         }
 
         void CombinePhase()
@@ -689,6 +608,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             Debug.Log("Combine Phase");
             m_handlingHand.SetAllSingleCardsMode(Card.MODE.WAIT_COMBINE);
             Card.ClearHappenHandlingObserver();
+            Card.EnqueueHappenHandlingObserver(m_UIManager.BackButton.Disable);
 
             foreach (var card in m_handlingHand.m_cards)
             {
@@ -709,19 +629,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 }
             }
 
-            // TurnEndButtonを押された時の挙動
             m_UIManager.TurnEndButton.Enable();
-            m_UIManager.TurnEndButton.RegistPressedBehave(() =>
-            {
-                m_handlingHand.SetAllWaitCardModeToSingle();
-                foreach (var card in m_handlingHand.m_cards)
-                {
-                    card.DisableDrag();
-                    card.ClearDragObserverList();
-                    Card.ClearHappenHandlingObserver();
-                }
-                WorkQueue.Instance.EnqueueOnceRunFunc(TurnEnd);
-            });
 
             Card.EnqueueHappenHandlingObserver(() =>
             {
@@ -743,6 +651,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             Debug.Log("Compress Phase");
             Card.ClearHappenHandlingObserver();
+            Card.EnqueueHappenHandlingObserver(m_UIManager.BackButton.Disable);
 
             if (!CanCompress())
             {
@@ -783,24 +692,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 }
             }
 
-            // TurnEndButtonを押された時の挙動
             m_UIManager.TurnEndButton.Enable();
-            m_UIManager.TurnEndButton.RegistPressedBehave(() =>
-            {
-                m_handlingHand.SetAllWaitCardModeToSingle();
-                foreach (Card card in m_handlingHand.m_cards)
-                {
-                    if (card.m_mode == Card.MODE.COMPRESSING)
-                        card.SetMode(Card.MODE.COMPRESSED);
-                }
-                foreach (var card in m_handlingHand.m_cards)
-                {
-                    card.DisableDrag();
-                    card.ClearDragObserverList();
-                    Card.ClearHappenHandlingObserver();
-                }
-                WorkQueue.Instance.EnqueueOnceRunFunc(TurnEnd);
-            });
 
             Card.EnqueueHappenHandlingObserver(() =>
             {
@@ -885,7 +777,6 @@ public class GameManager : MonoBehaviourPunCallbacks
             Debug.Log("Turn End");
 
             m_UIManager.TurnEndButton.Disable();
-            m_UIManager.TurnEndButton.ClearPressedBehave();
             m_gameStatus.SwitchTurn();
             WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
             WorkQueue.Instance.RestartRPC();
@@ -901,6 +792,112 @@ public class GameManager : MonoBehaviourPunCallbacks
                 WorkQueue.Instance.EnqueueOnceRunFunc(StartTurn);
             }
             return isMyTurn;
+        }
+
+        void OnPushedDrawButton()
+        {
+            CommonPressedBehave();
+            WorkQueue.Instance.EnqueueOnceRunFunc(DrawFromDeck);
+        }
+        void OnPushedDiscardButton()
+        {
+            CommonPressedBehave();
+            isFirstDiscard = true;
+            WorkQueue.Instance.EnqueueOnceRunFunc(DiscardPhase);
+        }
+        void OnPushedCombineButton()
+        {
+            CommonPressedBehave();
+            WorkQueue.Instance.EnqueueOnceRunFunc(CombinePhase);
+        }
+        void OnPushedCompressButton()
+        {
+            CommonPressedBehave();
+            WorkQueue.Instance.EnqueueOnceRunFunc(CompressPhase);
+        }
+        void OnPushedTurnEndButton()
+        {
+            CommonPressedBehave();
+            ClearCardsBehave();
+            WorkQueue.Instance.EnqueueOnceRunFunc(TurnEnd);
+
+            m_UIManager.BackButton.Disable();
+        }
+        void OnPushedBackButton()
+        {
+            ClearCardsBehave();
+            SetButtoninteraction();
+        }
+
+        void CommonPressedBehave()
+        {
+            WorkQueue.Instance.Restart();
+
+            m_UIManager.DrawButton.Disable();
+            m_UIManager.DiscardButton.Disable();
+            m_UIManager.CombineButton.Disable();
+            m_UIManager.CompressButton.Disable();
+            m_UIManager.TurnEndButton.Disable();
+
+            m_UIManager.BackButton.Enable();
+        }
+
+        void SetButtoninteraction()
+        {
+            // DrawButton
+            if (m_handlingDeck.m_cards.Count != 0 && !(m_drawedToTrushLastTurn && !m_handlingHand.CanAddCard()))
+            {
+                m_UIManager.DrawButton.Enable();
+            }
+
+            // DiscardButton
+            bool canDiscard = false;
+            foreach (var card in m_handlingHand.m_cards)
+            {
+                if (card.IsContinuous(m_LeftTrush.GetTopCard())) canDiscard = true;
+                if (card.IsContinuous(m_RightTrush.GetTopCard())) canDiscard = true;
+            }
+            if (m_handlingDeck.m_cards.Count == 0) canDiscard = true;
+            if (canDiscard)
+            {
+                m_UIManager.DiscardButton.Enable();
+            }
+
+            // CombineButton
+            if (m_handlingHand.GetCanCombineOrCompressCardNum() >= 2)
+            {
+                m_UIManager.CombineButton.Enable();
+            }
+
+            // CompressButton
+            if (CanCompress())
+            {
+                m_UIManager.CompressButton.Enable();
+            }
+
+            // TurnEndButton
+            m_UIManager.TurnEndButton.Enable();
+
+            m_UIManager.BackButton.Disable();
+        }
+
+        void ClearCardsBehave()
+        {
+            m_handlingHand.SetAllWaitCardModeToSingle();
+            foreach (Card card in m_handlingHand.m_cards)
+            {
+                if (card.m_mode == Card.MODE.COMPRESSING)
+                    card.SetMode(Card.MODE.COMPRESSED);
+            }
+            foreach (var card in m_handlingHand.m_cards)
+            {
+                card.DisableDrag();
+                card.ClearDragObserverList();
+            }
+            Card topCard = m_handlingDeck.GetTopCard();
+            topCard.DisableDrag();
+            topCard.ClearDragObserverList();
+            Card.ClearHappenHandlingObserver();
         }
     }
 
