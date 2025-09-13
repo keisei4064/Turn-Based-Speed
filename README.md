@@ -4,20 +4,15 @@
 高校の頃、超局所的に流行った
 
 > [!NOTE]
-> ワンゲーム対戦できるところまで実装したが、その後モチベーションが続かず放置。
+> ワンゲーム対戦できるところまで実装したが、その後モチベーションが続かず放置。  
 > 今やビルドできるかも怪しい。
 
 ## プレイ動画
 
-<video width="640" height="360" controls>
-  <source src="https://github.com/keisei4064/Turn-Based-Speed/blob/master/PlayVideos/start.mp4?raw=true" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+https://github.com/user-attachments/assets/b8f4f5bd-00d0-4488-9cc8-509afa6b7142
 
-<video width="640" height="360" controls>
-  <source src="https://github.com/keisei4064/Turn-Based-Speed/blob/master/PlayVideos/discard.mp4?raw=true" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+https://github.com/user-attachments/assets/7fdda618-19b2-4b15-bd57-e9a6d6e95bbd
+
 
 ## 開発環境等
 
